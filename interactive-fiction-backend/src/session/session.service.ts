@@ -119,7 +119,7 @@ export class SessionService {
   }
 
   // Helper to find a session by ID, potentially useful for other modules too
-  async findOne(id: number): Promise<Session | undefined> {
+  async findOne(id: number): Promise<Session | null> {
     return this.sessionsRepository.findOne({ where: { id }, relations: ['campaign', 'master', 'active_players'] });
   }
 
