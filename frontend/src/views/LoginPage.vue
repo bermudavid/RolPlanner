@@ -32,7 +32,7 @@ export default {
     async login() {
       this.error = ''; // Clear previous errors
       try {
-        const response = await axios.post('http://localhost:3000/api/auth/login', {
+        const response = await axios.post('', {
           username: this.username,
           password: this.password,
         });

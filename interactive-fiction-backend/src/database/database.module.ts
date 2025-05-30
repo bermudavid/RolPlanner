@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
-
+import { Session } from '../session/session.entity';
+import { Campaign } from 'src/campaign/campaign.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -11,8 +12,10 @@ import { User } from '../user/user.entity';
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'password',
       database: process.env.DB_NAME || 'interactive_fiction',
-      entities: [User],
       synchronize: true, // Shouldn't be used in production
+      logging: true,
+      entities: [User, Session, Campaign]
+     
     }),
   ],
 })
