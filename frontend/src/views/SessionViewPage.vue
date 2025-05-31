@@ -1,203 +1,304 @@
 <template>
-  <div class="session-view">
-    <h2>Game Session</h2>
-    <p>Session ID: {{ sessionId }}</p>
+  <div class="session-view-page">
+    <header class="page-header session-header">
+      <h1>Session: <span class="session-name">{{ sessionDisplayName }}</span></h1>
+      <div class="session-status">Status: <span class="status-active">Active</span></div>
+    </header>
 
-    <MapViewer v-if="modelUrl" :modelUrl="modelUrl" />
-    <div v-else>
-      <p>Loading map...</p>
-    </div>
-
-    <hr class="separator" />
-
-    <div class="session-content">
-      <div class="events-panel">
-        <h3>Session Events</h3>
-        <div v-if="events.length === 0" class="no-events">
-          No events yet.
-        </div>
-        <ul v-else class="event-list">
-          <li v-for="(event, index) in events" :key="index" class="event-item">
-            {{ event.message }}
-          </li>
-        </ul>
-      </div>
-
-      <div v-if="isMasterUser" class="master-controls">
-        <h3>Master Controls</h3>
-        <form @submit.prevent="sendEvent" class="event-form">
-          <div class="form-group">
-            <label for="eventMessage">Event Message:</label>
-            <textarea v-model="newEventMessage" id="eventMessage" rows="3" required></textarea>
+    <div class="session-main-content">
+      <div class="session-column main-column">
+        <div class="card story-progression-card">
+          <h2 class="card-title">Story Progression</h2>
+          <div class="story-text">
+            <p>The old tavern door creaks open, revealing a dimly lit room filled with the scent of ale and old wood. A mysterious figure in the corner beckons you closer, their face obscured by a heavy cloak. The air is thick with unspoken secrets and the low murmur of hushed conversations from other patrons.</p>
+            <p>"Welcome, traveler," a raspy voice croaks from the figure. "You look like you've seen a few roads. Perhaps you're looking for something... or someone?"</p>
+            <p>Around you, wanted posters plaster the walls, some faded and torn, others fresh. One particular poster near the bar catches your eye, detailing a hefty reward for a 'stolen artifact of immense power'.</p>
           </div>
-          <p v-if="eventError" class="error">{{ eventError }}</p>
-          <button type="submit">Send Event</button>
-        </form>
+        </div>
+
+        <div class="card player-actions-card">
+          <h2 class="card-title">Your Actions</h2>
+          <div class="actions-grid">
+            <button class="btn action-btn">Approach the Mysterious Figure</button>
+            <button class="btn action-btn">Order a Drink at the Bar</button>
+            <button class="btn action-btn">Examine the Wanted Posters</button>
+            <button class="btn action-btn">Scan the Room for Exits</button>
+            <button class="btn action-btn">Talk to the Barkeep</button>
+            <button class="btn action-btn">Check Your Inventory</button>
+          </div>
+        </div>
       </div>
+
+      <aside class="session-column side-column">
+        <div class="card session-details-card">
+          <h2 class="card-title">Session Details</h2>
+          <p><strong>Objective:</strong> Uncover the truth behind the stolen Sunstone.</p>
+          <p><strong>GM:</strong> MasterDM (The Storyteller)</p>
+          <p><strong>Active Players:</strong></p>
+          <ul>
+            <li>Elara (PlayerOne) - Level 5 Ranger</li>
+            <li>Grom (PlayerTwo) - Level 4 Barbarian</li>
+            <li>Seraphina (PlayerThree) - Level 5 Sorcerer</li>
+          </ul>
+        </div>
+
+        <div class="card event-log-card">
+          <h2 class="card-title">Event Log</h2>
+          <ul>
+            <li>Seraphina identified a faint magical aura around the figure.</li>
+            <li>Grom noticed the barkeep seems nervous.</li>
+            <li>Elara spotted a hidden clue on one of the wanted posters.</li>
+            <li>Session "The Tavern of Secrets" started.</li>
+          </ul>
+        </div>
+      </aside>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
-import MapViewer from '../components/MapViewer.vue';
+// import MapViewer from '../components/MapViewer.vue'; // If MapViewer is to be re-integrated
 
 export default {
   name: 'SessionViewPage',
-  components: {
-    MapViewer,
-  },
+  // components: { MapViewer },
   data() {
     return {
       sessionId: null,
-      modelUrl: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf',
-      events: [], // To store event messages locally
-      newEventMessage: '',
-      eventError: '',
-      userRole: null, // To determine if the current user is a Master
+      sessionName: "[Placeholder Session Name]", // Could be fetched
+      // userRole: null, // Example if needed for conditional rendering not shown in template
     };
   },
   computed: {
-    isMasterUser() {
-      return this.userRole === 'Master';
+    sessionDisplayName() {
+      // Example: could fetch actual session name based on ID
+      return this.sessionName || `ID: ${this.sessionId}`;
     }
   },
   created() {
     this.sessionId = this.$route.params.id;
-    this.determineUserRole();
-    // In a real app, you would fetch session details here, including the map/model URL
-    // and potentially existing events if they were persisted and retrievable.
+    // In a real app, fetch session details here using this.sessionId
+    // For example: this.fetchSessionDetails();
+    // this.determineUserRole();
   },
   methods: {
-    determineUserRole() {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const payload = JSON.parse(atob(token.split('.')[1]));
-          this.userRole = payload.role;
-        } catch (e) {
-          console.error('Error decoding token:', e);
-          this.userRole = null;
-        }
-      }
-    },
-    async sendEvent() {
-      if (!this.newEventMessage.trim()) {
-        this.eventError = "Event message cannot be empty.";
-        return;
-      }
-      this.eventError = '';
-
-      try {
-        const token = localStorage.getItem('token');
-        await axios.post(
-          `http://localhost:3000/api/sessions/${this.sessionId}/event`,
-          { message: this.newEventMessage },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        // Add to local events array for immediate display (MVP simulation)
-        this.events.push({ message: this.newEventMessage, sender: 'Master (Self)' }); // Added sender for clarity
-        this.newEventMessage = ''; // Clear the input field
-      } catch (err) {
-        if (err.response && err.response.data && err.response.data.message) {
-          this.eventError = Array.isArray(err.response.data.message) ? err.response.data.message.join(', ') : err.response.data.message;
-        } else {
-          this.eventError = 'Failed to send event. Please try again.';
-        }
-        console.error('Error sending event:', err);
-      }
-    },
+    // determineUserRole() {
+    //   const token = localStorage.getItem('token');
+    //   if (token) {
+    //     try {
+    //       const payload = JSON.parse(atob(token.split('.')[1]));
+    //       this.userRole = payload.role;
+    //     } catch (e) { console.error('Error decoding token:', e); this.userRole = null; }
+    //   }
+    // },
+    // async fetchSessionDetails() {
+    //   // Placeholder: API call to get session name, status, etc.
+    //   // this.sessionName = await api.getSessionName(this.sessionId);
+    // }
   }
 };
 </script>
 
 <style scoped>
-.session-view {
-  padding: 20px;
+/* .session-view-page {
+  Base padding handled by .page-container in App.vue if that class is applied to the router-view wrapper
+} */
+
+.session-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px; /* Increased padding */
+  border-bottom: 1px solid var(--color-accent-blue);
 }
 
-.map-viewer-container { /* Assuming this class is inside MapViewer.vue or applied to its root */
-  margin-bottom: 20px;
-}
-
-.separator {
-  margin: 20px 0;
-}
-
-.session-content {
-  display: flex;
-  gap: 20px;
-}
-
-.events-panel {
-  flex: 2;
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 4px;
-  background-color: #f9f9f9;
-  max-height: 400px; /* Or adjust as needed */
-  overflow-y: auto;
-}
-
-.events-panel h3 {
-  margin-top: 0;
-}
-
-.no-events {
-  color: #777;
-  font-style: italic;
-}
-
-.event-list {
-  list-style: none;
-  padding: 0;
+.session-header h1 {
+  font-size: var(--font-size-titles-main);
+  color: var(--color-text-primary);
   margin: 0;
 }
+.session-header .session-name {
+  color: var(--color-text-secondary); /* Slightly different color for session name */
+  font-style: italic; /* Italicize session name for distinction */
+}
 
-.event-item {
-  background-color: #fff;
-  border: 1px solid #eee;
-  padding: 8px 12px;
-  margin-bottom: 8px;
+.session-status {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-buttons); /* Using button font size */
+  color: var(--color-text-secondary);
+  background-color: var(--color-cards-panels); /* Consistent with other indicators */
+  padding: 8px 15px;
+  border-radius: 6px;
+  border: 1px solid var(--color-accent-blue);
+}
+.session-status .status-active {
+  color: #4CAF50; /* Green for active status */
+  font-weight: bold;
+}
+
+.session-main-content {
+  display: flex;
+  gap: 25px; /* Increased gap */
+  flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
+}
+
+.session-column.main-column {
+  flex: 2 1 450px; /* Main content takes more space, adjusted basis */
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Increased gap */
+  min-width: 300px; /* Prevent excessive squishing */
+}
+
+.session-column.side-column {
+  flex: 1 1 300px; /* Sidebar takes less space, adjusted basis */
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Increased gap */
+  min-width: 280px; /* Prevent excessive squishing */
+}
+
+.card { /* Ensure cards take full width of their column */
+    width: 100%;
+}
+
+.story-progression-card .story-text {
+  font-size: 1.05em; /* Slightly larger for readability of story, relative to base */
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  max-height: 400px; /* Limit height and allow scroll if story is very long */
+  overflow-y: auto;
+  padding-right: 10px; /* For scrollbar spacing */
+}
+
+.story-progression-card .story-text p {
+  margin-bottom: 1.2em; /* Paragraph spacing relative to font size */
+}
+/* Custom scrollbar for story text (optional, webkit only) */
+.story-progression-card .story-text::-webkit-scrollbar {
+  width: 8px;
+}
+.story-progression-card .story-text::-webkit-scrollbar-track {
+  background: var(--color-buttons);
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
-
-.master-controls {
-  flex: 1;
-  border: 1px solid #ddd;
-  padding: 15px;
+.story-progression-card .story-text::-webkit-scrollbar-thumb {
+  background: var(--color-accent-blue);
   border-radius: 4px;
-  background-color: #f9f9f9;
+}
+.story-progression-card .story-text::-webkit-scrollbar-thumb:hover {
+  background: var(--color-button-hover);
 }
 
-.master-controls h3 {
-  margin-top: 0;
+
+.player-actions-card .actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Adjusted minmax */
+  gap: 15px; /* Increased gap */
 }
 
-.event-form textarea {
-  width: calc(100% - 22px);
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  resize: vertical;
+.player-actions-card .action-btn {
+  width: 100%; /* Buttons take full width of their grid cell */
+  padding: 12px 10px; /* Adjusted padding for potentially longer text */
+  font-size: 0.95em; /* Slightly smaller font if actions text is long */
 }
 
-.event-form button {
-  background-color: #5cb85c;
-  color: white;
+.session-details-card ul,
+.event-log-card ul {
+  list-style: none;
+  padding-left: 0;
+  font-size: var(--font-size-lists-events);
+  color: var(--color-text-secondary);
+  margin-top: 10px; /* Space above list */
 }
 
-.event-form button:hover {
-  background-color: #4cae4c;
+.session-details-card li,
+.event-log-card li {
+  padding: 8px 5px; /* Adjusted padding */
+  border-bottom: 1px solid var(--color-buttons);
+  line-height: 1.5; /* Improve readability */
 }
 
-.error {
-  color: #d9534f; /* Bootstrap danger color */
-  margin-bottom: 10px;
+.session-details-card li:last-child,
+.event-log-card li:last-child {
+  border-bottom: none;
+}
+
+.session-details-card p {
+    margin-bottom: 0.8em; /* Consistent paragraph spacing */
+    font-size: var(--font-size-lists-events);
+}
+.session-details-card p strong {
+ color: var(--color-text-primary);
+ font-weight: 500; /* Medium weight for strong elements */
+}
+
+
+/* Card titles are globally styled. Reinforce or adjust if necessary. */
+.card-title { /* This is already in global style.css for .card-title */
+  font-size: var(--font-size-subtitles);
+  /* font-weight: bold; from prompt, but 500 might be better for subtitles */
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 15px;
+}
+
+/* Buttons are globally styled. Reinforce or adjust if necessary. */
+.btn { /* This is already in global style.css */
+   font-size: var(--font-size-buttons);
+}
+
+@media (max-width: 900px) {
+  .session-main-content {
+    flex-direction: column; /* Stack main and side columns */
+  }
+  .session-column.main-column, .session-column.side-column {
+    flex-basis: auto; /* Reset flex-basis */
+    width: 100%;
+    min-width: unset; /* Reset min-width */
+  }
+}
+
+@media (max-width: 768px) {
+   .session-header {
+      flex-direction: column; /* Stack header items */
+      align-items: flex-start; /* Align items to the start */
+      gap: 10px; /* Add gap between stacked items */
+   }
+   .session-header h1 {
+    font-size: calc(var(--font-size-titles-main) * 0.9);
+   }
+   .session-status {
+    padding: 6px 10px;
+    font-size: calc(var(--font-size-buttons) * 0.9);
+   }
+   .player-actions-card .actions-grid {
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); /* Smaller min button size for more density */
+      gap: 10px;
+   }
+   .player-actions-card .action-btn {
+    font-size: calc(0.95em * 0.95); /* Further reduce font if necessary */
+    padding: 10px 8px;
+   }
+}
+
+@media (max-width: 480px) {
+  .session-column.main-column, .session-column.side-column {
+    gap: 15px; /* Reduce gap between cards */
+  }
+  .card {
+    padding: 15px; /* Reduce card padding */
+  }
+  .card-title {
+    font-size: calc(var(--font-size-subtitles) * 0.9);
+  }
+  .story-progression-card .story-text {
+    font-size: 1em; /* Adjust story text font size */
+    max-height: 300px; /* Reduce max height */
+  }
+  .player-actions-card .actions-grid {
+    grid-template-columns: 1fr; /* Stack action buttons */
+  }
 }
 </style>

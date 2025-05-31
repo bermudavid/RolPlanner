@@ -1,3 +1,126 @@
+/* Global Style Definitions based on user requirements */
+
+/* Font Import (Example - actual import might be via index.html or main.js) */
+/* @import url('https://fonts.googleapis.com/css2?family=Georgia&display=swap'); */
+/* For now, assume Georgia is available or use a common serif fallback */
+
+:root {
+  --font-primary: 'Georgia', serif;
+
+  --color-background-main: #1C1F2B;
+  --color-cards-panels: #222633;
+  --color-buttons: #2D3544;
+  --color-button-hover: #3C4F6E; /* Botón activo (hover) */
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #D3D7E0;
+  --color-accent-blue: #3A4A66; /* Acentos azulados */
+
+  /* Base font sizes from typography table */
+  --font-size-titles-main: 24px;
+  --font-size-subtitles: 18px;
+  --font-size-buttons: 16px;
+  --font-size-lists-events: 14px;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--color-background-main);
+  color: var(--color-text-secondary); /* Default text color for general content */
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-primary);
+  font-family: var(--font-primary); /* Redundant if body has it, but explicit */
+}
+
+/* Base styles for card-like elements */
+.card {
+  background-color: var(--color-cards-panels);
+  border-radius: 8px; /* Soft borders */
+  padding: 20px;
+  margin-bottom: 20px; /* Spacing between cards */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  border: 1px solid var(--color-accent-blue); /* Subtle border */
+}
+
+.card-title {
+  font-size: var(--font-size-subtitles); /* Example, adjust as needed */
+  color: var(--color-text-primary);
+  margin-bottom: 15px;
+}
+
+/* Base button style */
+.btn {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-buttons);
+  font-weight: 500; /* Medium */
+  color: var(--color-text-primary);
+  background-color: var(--color-buttons);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px; /* Rounded corners */
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Effect of elevation */
+}
+
+.btn:hover {
+  background-color: var(--color-button-hover);
+}
+
+/* General link styling */
+a {
+  color: var(--color-accent-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Input field base styling for dark theme */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+select {
+  background-color: var(--color-buttons); /* Similar to button bg */
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-accent-blue);
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px; /* Add some default margin */
+  width: calc(100% - 22px); /* Full width by default, accounting for padding and border */
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-text-secondary); /* Highlight focus */
+  box-shadow: 0 0 5px rgba(var(--color-accent-blue-rgb), 0.5); /* Using accent blue with alpha */
+}
+
+/* Add a general container for pages to have some padding */
+.page-container {
+  padding: 20px;
+}
+
+/* Ensure the root element for Vue takes full height */
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add any existing style.css content after these new global styles */
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

@@ -10,9 +10,9 @@
         <li v-if="isLoggedIn"><button @click="logout">Logout</button></li>
       </ul>
     </nav>
-    <div class="container">
+    <main class="main-content page-container">
       <router-view></router-view>
-    </div>
+    </main>
   </div>
 </template>
 
