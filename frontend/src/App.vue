@@ -1,17 +1,21 @@
 <template>
-  <div id="app">
-    <header class="global-header">
-      <nav class="global-nav">
-        <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/login" class="nav-link">Login</router-link>
-        <router-link to="/register" class="nav-link">Register</router-link>
-        <!-- Conditional links from previous version are removed for now as per subtask focus -->
-        <!-- Example: <router-link v-if="isMaster" to="/master/dashboard" class="nav-link">Master Dashboard</router-link> -->
-        <!-- Example: <button v-if="isLoggedIn" @click="logout" class="nav-link logout-button">Logout</button> -->
+  <div id="app"> 
+    <header class="global-header"> 
+       <nav class="global-nav">
+          <ul>
+            <li><router-link to="/">Home</router-link></li>
+            <li v-if="!isLoggedIn"><router-link to="/login">Login</router-link></li>
+            <li v-if="!isLoggedIn"><router-link to="/register">Register</router-link></li>
+            <li v-if="isMaster"><router-link to="/master/dashboard">Master Dashboard</router-link></li>
+            <li v-if="isPlayer"><router-link to="/player/dashboard">Player Dashboard</router-link></li>
+            <li v-if="isLoggedIn"><button @click="logout">Logout</button></li>
+          </ul> 
       </nav>
     </header>
     <main class="main-content page-container">
       <router-view />
+    <main class="main-content page-container">
+      <router-view></router-view>
     </main>
   </div>
 </template>
