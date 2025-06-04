@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
 import { User } from '../user/user.entity';
 
 @Entity()
@@ -20,4 +20,12 @@ export class Campaign {
 
   @Column()
   master_id: number;
+
+  @ManyToMany(() => User, user => user.joined_campaigns)
+  @JoinTable({
+    name: 'campaign_players_user', // Name of the join table
+    joinColumn: { name: 'campaign_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
+  players: User[];
 }

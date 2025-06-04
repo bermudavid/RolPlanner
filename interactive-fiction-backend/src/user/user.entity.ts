@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { Session } from '../session/session.entity';
+import { Campaign } from '../campaign/campaign.entity';
 
 export enum UserRole {
   MASTER = 'Master',
@@ -26,4 +27,7 @@ export class User {
 
   @ManyToMany(() => Session, session => session.active_players)
   sessions: Session[]; // Sessions this user is an active player in
+
+  @ManyToMany(() => Campaign, campaign => campaign.players)
+  joined_campaigns: Campaign[];
 }

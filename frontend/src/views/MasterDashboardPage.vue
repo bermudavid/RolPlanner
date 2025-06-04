@@ -11,9 +11,38 @@
       <!-- Left Column -->
       <aside class="dashboard-column left-column">
         <div class="card campaigns-card">
-          <h2 class="card-title">Campaigns</h2>
-          <p>Manage your game campaigns, create new adventures, and track ongoing stories.</p>
-          <button class="btn">New Campaign</button>
+          <h2 class="card-title">My Campaigns</h2>
+          <!-- Error Display -->
+          <div v-if="error" class="error-message">{{ error }}</div>
+
+          <!-- Loading Indicator -->
+          <div v-if="isLoading && !error" class="loading-indicator">
+            <p>Loading your campaigns...</p>
+          </div>
+
+          <div v-if="!isLoading && !error">
+            <div v-if="masterCampaigns.length === 0" class="empty-state">
+              <p>You haven't created any campaigns yet.</p>
+            </div>
+            <ul v-else class="campaign-list">
+              <li v-for="campaign in masterCampaigns" :key="campaign.id" class="campaign-item">
+                <h3>{{ campaign.name }}</h3>
+                <p class="campaign-description">{{ campaign.description }}</p>
+
+                <div class="players-section">
+                  <h4>Players Enrolled:</h4>
+                  <ul v-if="getCampaignPlayersList(campaign).length > 0" class="player-list">
+                    <li v-for="player in getCampaignPlayersList(campaign)" :key="player.id" class="player-item">
+                      {{ player.username }}
+                    </li>
+                  </ul>
+                  <p v-else class="no-players-message">No players have joined this campaign yet.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- TODO: Hook this up if a navigation function like navigateToCreateCampaign is implemented -->
+          <button class="btn" style="margin-top: 20px;">New Campaign</button>
         </div>
 
         <div class="card event-manager-card">
@@ -64,13 +93,133 @@
 </template>
 
 <script>
+import axios from 'axios'; // Assuming axios is installed and configured
+
 export default {
   name: 'MasterDashboardPage',
-  // Add methods or data properties if needed for interactivity
+  data() {
+    return {
+      masterCampaigns: [],
+      error: null,
+      isLoading: false,
+      // selectedCampaignId: null, // Optional: for showing players of a single selected campaign
+    };
+  },
+  methods: {
+    async fetchMasterCampaigns() {
+      this.isLoading = true;
+      this.error = null;
+      try {
+        // Ensure your API prefix is correct
+        const response = await axios.get('/api/campaigns/master/my-campaigns'); // Auth needed
+        this.masterCampaigns = response.data;
+      } catch (err) {
+        this.error = 'Failed to load your campaigns. ' + (err.response?.data?.message || err.message);
+        console.error("Error fetching master campaigns:", err);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    // Helper to safely access players list, backend is expected to populate campaign.players
+    getCampaignPlayersList(campaign) {
+      return campaign && campaign.players ? campaign.players : [];
+    },
+    // navigateToCreateCampaign() { // Example placeholder for navigation
+    //   this.$router.push({ name: 'CreateCampaignPage' }); // Assuming you have a route named 'CreateCampaignPage'
+    // }
+  },
+  created() {
+    // Assuming auth token is set globally for axios
+    this.fetchMasterCampaigns();
+  },
 };
 </script>
 
 <style scoped>
+.error-message {
+  color: var(--color-accent-red);
+  background-color: rgba(255, 0, 0, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 15px; /* Adjusted margin */
+  border: 1px solid var(--color-accent-red);
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0; /* Adjusted padding */
+  color: var(--color-text-secondary);
+}
+.loading-indicator p {
+    font-size: var(--font-size-subtitles);
+}
+
+.empty-state p {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  padding: 10px 0;
+}
+
+.campaign-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 15px;
+}
+
+.campaign-item {
+  padding: 15px 5px;
+  border-bottom: 1px solid var(--color-buttons); /* Using button color as separator */
+}
+.campaign-item:last-child {
+  border-bottom: none;
+}
+
+.campaign-item h3 {
+  font-size: var(--font-size-card-subtitle); /* Example: 1.2rem */
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.campaign-description {
+  font-size: var(--font-size-small-text); /* Example: 0.9rem */
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.players-section {
+  margin-top: 10px;
+  padding-left: 15px; /* Indent player section */
+  border-left: 2px solid var(--color-accent-blue-light); /* Accent for player section */
+}
+
+.players-section h4 {
+  font-size: var(--font-size-base-text); /* Example: 1rem */
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+  font-weight: 500; /* Medium weight */
+}
+
+.player-list {
+  list-style: disc; /* Use disc for sub-list */
+  padding-left: 20px; /* Indent player items */
+  margin-top: 5px;
+}
+
+.player-item {
+  font-size: var(--font-size-small-text);
+  color: var(--color-text-secondary);
+  padding: 4px 0; /* Spacing for player items */
+}
+
+.no-players-message {
+  font-size: var(--font-size-small-text);
+  color: var(--color-text-tertiary); /* Softer color for this message */
+  font-style: italic;
+}
+
+
 /* .master-dashboard-page {
   padding: already handled by page-container in App.vue if that class is applied to the router-view wrapper
 } */
