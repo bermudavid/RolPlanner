@@ -45,11 +45,17 @@ export class CampaignService {
 
   async findAllForUser(user: User): Promise<Campaign[]> {
     if (user.role === UserRole.MASTER) {
+      // Masters should see their own campaigns as well as any
+      // other public campaigns available on the platform.
       return this.campaignsRepository.find({
-        where: { master_id: user.id },
+        where: [
+          { master_id: user.id },
+          { is_public: true },
+        ],
         relations: ['master'],
       });
     }
+
     return this.campaignsRepository.find({
       where: { is_public: true },
       relations: ['master'],

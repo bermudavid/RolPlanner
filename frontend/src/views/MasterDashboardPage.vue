@@ -55,6 +55,21 @@
 
         <div class="card sessions-card">
           <h2 class="card-title">Sessions</h2>
+          <button class="btn" @click="showSessionForm = !showSessionForm">New Session</button>
+          <form v-if="showSessionForm" @submit.prevent="createSession" class="session-form">
+            <div class="form-group">
+              <label for="sessionName">Name</label>
+              <input id="sessionName" v-model="sessionName" required />
+            </div>
+            <div class="form-group">
+              <label for="sessionCampaign">Campaign</label>
+              <select id="sessionCampaign" v-model="sessionCampaignId" required>
+                <option disabled value="">Select campaign</option>
+                <option v-for="c in campaigns" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+            <button type="submit" class="btn">Create</button>
+          </form>
           <ul class="campaign-list">
             <li v-for="s in sessions" :key="s.id" class="campaign-item">
               <div class="campaign-info">
@@ -130,6 +145,7 @@ export default {
   data() {
     return {
       showForm: false,
+      showSessionForm: false,
       name: '',
       description: '',
       file: null,
@@ -137,6 +153,8 @@ export default {
       isPublic: true,
       campaigns: [],
       sessions: [],
+      sessionName: '',
+      sessionCampaignId: '',
       joinLink: '',
     };
   },
@@ -193,6 +211,17 @@ export default {
     },
     async startSession(id) {
       await api.patch(`/sessions/${id}/start`);
+      await this.fetchSessions();
+    },
+
+    async createSession() {
+      await api.post('/sessions', {
+        name: this.sessionName,
+        campaign_id: Number(this.sessionCampaignId),
+      });
+      this.sessionName = '';
+      this.sessionCampaignId = '';
+      this.showSessionForm = false;
       await this.fetchSessions();
     },
   },
