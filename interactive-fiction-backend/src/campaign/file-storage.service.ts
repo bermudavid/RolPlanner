@@ -22,6 +22,6 @@ export class FileStorageService {
     const filename = `${randomUUID()}${extname(file.originalname)}`;
     const filePath = join(uploadsDir, filename);
     await fs.writeFile(filePath, file.buffer);
-    return filePath;
+    return `/models/${filename}`;
   }
 }
