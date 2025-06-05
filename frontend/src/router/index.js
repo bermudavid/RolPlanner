@@ -5,6 +5,7 @@ import RegisterPage from '../views/RegisterPage.vue';
 import MasterDashboardPage from '../views/MasterDashboardPage.vue';
 import PlayerDashboardPage from '../views/PlayerDashboardPage.vue';
 import SessionViewPage from '../views/SessionViewPage.vue';
+import CampaignEditorPage from '../views/CampaignEditorPage.vue';
 
 const routes = [
   { path: '/', component: HomePage },
@@ -24,6 +25,11 @@ const routes = [
     path: '/session/:id',
     component: SessionViewPage,
     meta: { requiresAuth: true } // Accessible by both Player and Master
+  },
+  {
+    path: '/campaign/:id/edit',
+    component: CampaignEditorPage,
+    meta: { requiresAuth: true, role: 'Master' }
   },
   // Redirect to home if path not found
   { path: '/:pathMatch(.*)*', redirect: '/' }

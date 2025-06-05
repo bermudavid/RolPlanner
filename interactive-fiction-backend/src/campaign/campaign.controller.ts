@@ -33,22 +33,39 @@ export class CampaignController {
   @UseInterceptors(FileInterceptor('model'))
   async create(
     @UploadedFile() model: Express.Multer.File,
-    @Body() createCampaignDto: { name: string; description: string; map_details?: any },
+    @Body()
+    createCampaignDto: {
+      name: string;
+      description: string;
+      map_details?: any;
+      is_public?: boolean;
+      password?: string;
+    },
     @Request() req,
   ) {
     const modelPath = model ? await this.fileStorageService.saveModelFile(model) : undefined;
-    return this.campaignService.create(
+    const campaign = await this.campaignService.create(
       createCampaignDto.name,
       createCampaignDto.description,
       createCampaignDto.map_details,
       req.user,
       modelPath,
+      createCampaignDto.is_public ?? true,
+      createCampaignDto.password,
     );
+    if (!campaign.is_public && campaign.join_token) {
+      const base = `${req.protocol}://${req.get('host')}`;
+      return {
+        ...campaign,
+        joinLink: `${base}/campaigns/${campaign.id}/join?token=${campaign.join_token}`,
+      };
+    }
+    return campaign;
   }
 
   @Get()
-  findAll() {
-    return this.campaignService.findAll();
+  findAll(@Request() req) {
+    return this.campaignService.findAllForUser(req.user);
   }
 
   @Get(':id')
@@ -62,7 +79,14 @@ export class CampaignController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() model: Express.Multer.File,
-    @Body() updateCampaignDto: { name: string; description: string; map_details?: any },
+    @Body()
+    updateCampaignDto: {
+      name: string;
+      description: string;
+      map_details?: any;
+      is_public?: boolean;
+      password?: string | null;
+    },
     @Request() req,
   ) {
     const modelPath = model ? await this.fileStorageService.saveModelFile(model) : undefined;
@@ -73,6 +97,8 @@ export class CampaignController {
       updateCampaignDto.map_details,
       req.user,
       modelPath,
+      updateCampaignDto.is_public ?? true,
+      updateCampaignDto.password,
     );
   }
 

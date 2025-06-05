@@ -27,8 +27,24 @@
               <label for="model">GLTF Model</label>
               <input id="model" type="file" @change="onFileChange" />
             </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" v-model="isPublic" /> Public
+              </label>
+            </div>
+            <div class="form-group" v-if="!isPublic">
+              <label for="password">Password</label>
+              <input id="password" type="password" v-model="password" />
+            </div>
             <button type="submit" class="btn">Save</button>
+            <p v-if="joinLink" class="join-link">Share: {{ joinLink }}</p>
           </form>
+          <ul class="campaign-list">
+            <li v-for="c in campaigns" :key="c.id">
+              {{ c.name }}
+              <button class="btn" @click="openCampaign(c.id)">Open</button>
+            </li>
+          </ul>
         </div>
 
         <div class="card event-manager-card">
@@ -89,7 +105,14 @@ export default {
       name: '',
       description: '',
       file: null,
+      password: '',
+      isPublic: true,
+      campaigns: [],
+      joinLink: '',
     };
+  },
+  created() {
+    this.fetchCampaigns();
   },
   methods: {
     onFileChange(e) {
@@ -99,18 +122,35 @@ export default {
       const formData = new FormData();
       formData.append('name', this.name);
       formData.append('description', this.description);
+      formData.append('is_public', this.isPublic);
+      if (this.password) {
+        formData.append('password', this.password);
+      }
       if (this.file) {
         formData.append('model', this.file);
       }
-      await api.post('/campaigns', formData, {
+      const { data } = await api.post('/campaigns', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      if (data.joinLink) {
+        this.joinLink = data.joinLink;
+      }
+      await this.fetchCampaigns();
       this.showForm = false;
       this.name = '';
       this.description = '';
       this.file = null;
+      this.password = '';
+      this.isPublic = true;
+    },
+    async fetchCampaigns() {
+      const { data } = await api.get('/campaigns');
+      this.campaigns = data;
+    },
+    openCampaign(id) {
+      this.$router.push(`/campaign/${id}/edit`);
     },
   },
 };

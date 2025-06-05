@@ -9,6 +9,15 @@
 
     <div class="dashboard-main-content">
       <div class="dashboard-column full-width-column">
+        <div class="card sessions-card">
+          <h2 class="card-title">Available Sessions</h2>
+          <ul>
+            <li v-for="s in sessions" :key="s.id">
+              {{ s.name }} - {{ s.campaign.name }}
+              <button class="btn" @click="joinSession(s)">Join</button>
+            </li>
+          </ul>
+        </div>
         <div class="card active-campaigns-card">
           <h2 class="card-title">My Active Campaigns</h2>
           <p>You are currently participating in <strong>"The Dragon's Curse"</strong>.</p>
@@ -43,9 +52,30 @@
 </template>
 
 <script>
+import api from '../api';
 export default {
   name: 'PlayerDashboardPage',
-  // Add methods or data properties if needed for interactivity
+  data() {
+    return { sessions: [] };
+  },
+  created() {
+    this.fetchSessions();
+  },
+  methods: {
+    async fetchSessions() {
+      const { data } = await api.get('/sessions');
+      this.sessions = data;
+    },
+    async joinSession(session) {
+      let body = {};
+      if (!session.campaign.is_public) {
+        const password = prompt('Campaign password');
+        body = { joinToken: session.campaign.join_token, password };
+      }
+      await api.post(`/sessions/${session.id}/join`, body);
+      await this.fetchSessions();
+    },
+  }
 };
 </script>
 

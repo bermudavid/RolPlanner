@@ -18,6 +18,15 @@ export class Campaign {
   @Column({ nullable: true })
   model_path?: string;
 
+  @Column({ default: true })
+  is_public: boolean;
+
+  @Column({ nullable: true })
+  password_hash?: string;
+
+  @Column({ nullable: true })
+  join_token?: string;
+
   @ManyToOne(() => User)
   master: User;
 

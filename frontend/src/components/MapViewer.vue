@@ -25,7 +25,7 @@ export default {
     },
     sessionId: {
       type: Number,
-      required: true,
+      default: null,
     },
   },
   data() {
@@ -46,13 +46,15 @@ export default {
     this.loadModel();
     this.animate();
 
-    this.socket = io('http://localhost:3000/sessions');
-    this.socket.emit('joinSession', { sessionId: this.sessionId });
-    this.socket.on('cameraUpdate', payload => {
-      if (payload.clientId !== this.socket.id) {
-        this.updatePlayerView(payload.position, payload.quaternion);
-      }
-    });
+    if (this.sessionId !== null) {
+      this.socket = io('http://localhost:3000/sessions');
+      this.socket.emit('joinSession', { sessionId: this.sessionId });
+      this.socket.on('cameraUpdate', payload => {
+        if (payload.clientId !== this.socket.id) {
+          this.updatePlayerView(payload.position, payload.quaternion);
+        }
+      });
+    }
   },
   beforeUnmount() {
     this.cleanupThree();

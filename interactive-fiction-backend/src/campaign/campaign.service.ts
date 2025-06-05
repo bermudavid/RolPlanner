@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Campaign } from './campaign.entity';
 import { User, UserRole } from '../user/user.entity';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class CampaignService {
@@ -17,23 +19,39 @@ export class CampaignService {
     map_details: any,
     master: User,
     model_path?: string,
+    is_public = true,
+    password?: string,
   ): Promise<Campaign> {
     if (master.role !== UserRole.MASTER) {
       throw new UnauthorizedException('Only Masters can create campaigns.');
     }
+    const password_hash = password ? await bcrypt.hash(password, 10) : undefined;
+    const join_token = is_public ? undefined : randomBytes(16).toString('hex');
     const newCampaign = this.campaignsRepository.create({
       name,
       description,
       map_details,
       model_path,
+      is_public,
+      password_hash,
+      join_token,
       master_id: master.id,
-      master, // Store the user object as well for easier access if needed
+      master,
     });
     return this.campaignsRepository.save(newCampaign);
   }
 
-  async findAll(): Promise<Campaign[]> {
-    return this.campaignsRepository.find({ relations: ['master'] });
+  async findAllForUser(user: User): Promise<Campaign[]> {
+    if (user.role === UserRole.MASTER) {
+      return this.campaignsRepository.find({
+        where: { master_id: user.id },
+        relations: ['master'],
+      });
+    }
+    return this.campaignsRepository.find({
+      where: { is_public: true },
+      relations: ['master'],
+    });
   }
 
   async findOne(id: number): Promise<Campaign> {
@@ -51,6 +69,8 @@ export class CampaignService {
     map_details: any,
     user: User,
     model_path?: string,
+    is_public = true,
+    password?: string,
   ): Promise<Campaign> {
     const campaign = await this.findOne(id);
     if (campaign.master_id !== user.id || user.role !== UserRole.MASTER) {
@@ -59,6 +79,15 @@ export class CampaignService {
     campaign.name = name;
     campaign.description = description;
     campaign.map_details = map_details;
+    campaign.is_public = is_public;
+    if (password !== undefined) {
+      campaign.password_hash = password
+        ? await bcrypt.hash(password, 10)
+        : undefined;
+      if (!is_public && !campaign.join_token) {
+        campaign.join_token = randomBytes(16).toString('hex');
+      }
+    }
     if (model_path) {
       campaign.model_path = model_path;
     }
