@@ -102,7 +102,9 @@ export default {
         this.sessionName = data.name;
         if (data.campaign && data.campaign.model_path) {
           const base = import.meta.env.VITE_API_BASE_URL.replace(/\/api$/, '');
-          this.modelUrl = `${base}/${data.campaign.model_path}`;
+          const sanitizedBase = base.replace(/\/$/, '');
+          const sanitizedPath = data.campaign.model_path.replace(/^\//, '');
+          this.modelUrl = `${sanitizedBase}/${sanitizedPath}`;
         }
       } catch (e) {
         console.error('Failed to fetch session details:', e);

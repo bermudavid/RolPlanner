@@ -23,7 +23,9 @@ export default {
       const { data } = await api.get(`/campaigns/${this.id}`);
       if (data.model_path) {
         const base = import.meta.env.VITE_API_BASE_URL.replace(/\/api$/, '');
-        this.modelUrl = `${base}/${data.model_path}`;
+        const sanitizedBase = base.replace(/\/$/, '');
+        const sanitizedPath = data.model_path.replace(/^\//, '');
+        this.modelUrl = `${sanitizedBase}/${sanitizedPath}`;
       }
     },
   },
