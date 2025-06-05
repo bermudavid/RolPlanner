@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Brackets } from 'typeorm';
 import { Session, SessionStatus } from './session.entity';
 import { User, UserRole } from '../user/user.entity';
 import { Campaign } from '../campaign/campaign.entity';
@@ -62,13 +62,22 @@ export class SessionService {
         relations: ['campaign', 'master', 'active_players'],
       });
     }
-    return this.sessionsRepository.find({
-      where: [
-        { status: SessionStatus.PENDING },
-        { status: SessionStatus.ACTIVE },
-      ],
-      relations: ['campaign', 'master', 'active_players'],
-    });
+    return this.sessionsRepository
+      .createQueryBuilder('session')
+      .leftJoinAndSelect('session.campaign', 'campaign')
+      .leftJoinAndSelect('session.master', 'master')
+      .leftJoinAndSelect('session.active_players', 'active_players')
+      .where('session.status IN (:...statuses)', {
+        statuses: [SessionStatus.PENDING, SessionStatus.ACTIVE],
+      })
+      .andWhere(
+        new Brackets(qb => {
+          qb.where('campaign.is_public = true').orWhere('active_players.id = :userId', {
+            userId: user.id,
+          });
+        }),
+      )
+      .getMany();
   }
 
   async joinSession(
