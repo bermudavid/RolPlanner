@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Campaign } from './campaign.entity';
 import { User, UserRole } from '../user/user.entity';
+import { FileStorageService } from './file-storage.service';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 
@@ -11,6 +12,7 @@ export class CampaignService {
   constructor(
     @InjectRepository(Campaign)
     private campaignsRepository: Repository<Campaign>,
+    private readonly fileStorage: FileStorageService,
   ) {}
 
   async create(
@@ -99,6 +101,7 @@ export class CampaignService {
     if (campaign.master_id !== user.id || user.role !== UserRole.MASTER) {
       throw new UnauthorizedException('You are not authorized to delete this campaign.');
     }
+    await this.fileStorage.deleteModel(campaign.model_path);
     await this.campaignsRepository.delete(id);
   }
 }

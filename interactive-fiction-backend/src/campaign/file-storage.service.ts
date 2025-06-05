@@ -8,6 +8,15 @@ import { promisify } from 'util';
 
 const exec = promisify(execCb);
 
+// Decompression library is ESM only. Use dynamic import to avoid commonjs issues.
+type Decompress = (input: Buffer, output: string) => Promise<unknown>;
+
+// Lazily load the decompress function when needed
+async function getDecompress(): Promise<Decompress> {
+  const mod = await import('@xhmikosr/decompress');
+  return (mod.default ?? mod) as Decompress;
+}
+
 @Injectable()
 export class FileStorageService {
   getModelStorage(): StorageEngine {
@@ -28,13 +37,10 @@ export class FileStorageService {
       const dirName = randomUUID();
       const dirPath = join(uploadsDir, dirName);
       await fs.mkdir(dirPath, { recursive: true });
-      const zipPath = join(dirPath, file.originalname);
-      await fs.writeFile(zipPath, file.buffer);
-      try {
-        await exec(`unzip -q ${zipPath} -d ${dirPath}`);
-      } finally {
-        await fs.unlink(zipPath);
-      }
+
+      const decompress = await getDecompress();
+      await decompress(file.buffer, dirPath);
+
       const files = await fs.readdir(dirPath);
       const modelFile = files.find((f) =>
         f.toLowerCase().endsWith('.gltf') || f.toLowerCase().endsWith('.glb'),
@@ -45,9 +51,22 @@ export class FileStorageService {
       return `/models/${dirName}/${modelFile}`;
     }
 
+
     const filename = `${randomUUID()}${ext}`;
     const filePath = join(uploadsDir, filename);
     await fs.writeFile(filePath, file.buffer);
     return `/models/${filename}`;
+  }
+
+  async deleteModel(pathFromDb?: string): Promise<void> {
+    if (!pathFromDb) return;
+    const trimmed = pathFromDb.replace(/^\/models\//, '');
+    const parts = trimmed.split(/[/\\]/);
+    const base = join('uploads', 'models', parts[0]);
+    try {
+      await fs.rm(base, { recursive: true, force: true });
+    } catch {
+      // ignore
+    }
   }
 }
