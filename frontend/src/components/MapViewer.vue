@@ -123,13 +123,38 @@ export default {
     },
     
     cleanupModel() {
-        if (this.loadedModel) {
-            this.scene.remove(this.loadedModel);
-            // You might need to dispose geometries/materials if they are unique to this model
-            // For simplicity here, we assume GLTFLoader handles disposal of its loaded resources
-            // or that models are simple enough not to cause significant memory leaks on reload.
-            this.loadedModel = null;
+      if (!this.loadedModel) return;
+
+      // Traverse the loaded model and dispose geometries, materials and textures
+      this.loadedModel.traverse((child) => {
+        if (child.isMesh) {
+          if (child.geometry) {
+            child.geometry.dispose();
+          }
+
+          if (child.material) {
+            const materials = Array.isArray(child.material)
+              ? child.material
+              : [child.material];
+
+            materials.forEach((mat) => {
+              // dispose textures attached to the material
+              Object.keys(mat).forEach((key) => {
+                const value = mat[key];
+                if (value && value.isTexture) {
+                  value.dispose();
+                }
+              });
+
+              mat.dispose();
+            });
+          }
         }
+      });
+
+      // Remove the model from the scene and clear reference
+      this.scene.remove(this.loadedModel);
+      this.loadedModel = null;
     },
 
     animate() {
