@@ -61,8 +61,8 @@ export class SessionService {
         where: { master_id: user.id },
         relations: ['campaign', 'master', 'active_players'],
       });
-    }
-    return this.sessionsRepository
+    } 
+ return this.sessionsRepository
       .createQueryBuilder('session')
       .leftJoinAndSelect('session.campaign', 'campaign')
       .leftJoinAndSelect('session.master', 'master')
