@@ -35,6 +35,6 @@ export default {
 <style scoped>
 .campaign-editor-page {
   width: 100%;
-  height: 100%;
+  min-height: 80vh; /* give viewer vertical space */
 }
 </style>
