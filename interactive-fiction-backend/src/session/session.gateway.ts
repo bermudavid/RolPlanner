@@ -28,6 +28,24 @@ export class SessionGateway implements OnGatewayConnection, OnGatewayDisconnect 
     // connection closed
   }
 
+  @SubscribeMessage('cameraUpdate')
+  handleCameraUpdate(
+    @MessageBody()
+    data: {
+      sessionId: number;
+      position: { x: number; y: number; z: number };
+      quaternion: { x: number; y: number; z: number; w: number };
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = String(data.sessionId);
+    this.server.to(room).emit('cameraUpdate', {
+      clientId: client.id,
+      position: data.position,
+      quaternion: data.quaternion,
+    });
+  }
+
   @SubscribeMessage('joinSession')
   handleJoinSession(
     @MessageBody() data: { sessionId: number },
