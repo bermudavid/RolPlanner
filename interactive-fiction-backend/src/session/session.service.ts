@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In, Brackets } from 'typeorm';
 import { Session, SessionStatus } from './session.entity';
 import { User, UserRole } from '../user/user.entity';
 import { Campaign } from '../campaign/campaign.entity';
@@ -62,13 +62,15 @@ export class SessionService {
         relations: ['campaign', 'master', 'active_players'],
       });
     }
-    return this.sessionsRepository.find({
-      where: [
-        { status: SessionStatus.PENDING },
-        { status: SessionStatus.ACTIVE },
-      ],
+    const sessions = await this.sessionsRepository.find({
+      where: {
+        status: In([SessionStatus.PENDING, SessionStatus.ACTIVE]),
+      },
       relations: ['campaign', 'master', 'active_players'],
     });
+    return sessions.filter(
+      s => s.campaign.is_public || s.active_players.some(p => p.id === user.id),
+    );
   }
 
   async joinSession(
