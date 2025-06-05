@@ -62,7 +62,8 @@ export class SessionService {
         relations: ['campaign', 'master', 'active_players'],
       });
     }
-    const sessions = await this.sessionsRepository.find({
+
+  const sessions = await this.sessionsRepository.find({
       where: {
         status: In([SessionStatus.PENDING, SessionStatus.ACTIVE]),
       },
@@ -70,7 +71,7 @@ export class SessionService {
     });
     return sessions.filter(
       s => s.campaign.is_public || s.active_players.some(p => p.id === user.id),
-    );
+    ); 
   }
 
   async joinSession(

@@ -40,9 +40,15 @@
             <p v-if="joinLink" class="join-link">Share: {{ joinLink }}</p>
           </form>
           <ul class="campaign-list">
-            <li v-for="c in campaigns" :key="c.id">
-              {{ c.name }}
-              <button class="btn" @click="openCampaign(c.id)">Open</button>
+            <li v-for="c in campaigns" :key="c.id" class="campaign-item">
+              <div class="campaign-info">
+                <strong>{{ c.name }}</strong>
+                <p class="campaign-description">{{ c.description }}</p>
+              </div>
+              <div class="campaign-actions">
+                <button class="btn" @click="openCampaign(c.id)">Open</button>
+                <button class="btn btn-danger" @click="deleteCampaign(c.id)">Delete</button>
+              </div>
             </li>
           </ul>
         </div>
@@ -152,6 +158,11 @@ export default {
     openCampaign(id) {
       this.$router.push(`/campaign/${id}/edit`);
     },
+    async deleteCampaign(id) {
+      if (!confirm('Delete this campaign?')) return;
+      await api.delete(`/campaigns/${id}`);
+      await this.fetchCampaigns();
+    },
   },
 };
 </script>
@@ -188,30 +199,35 @@ export default {
 }
 
 .dashboard-main-content {
-  display: flex;
-  gap: 25px; /* Increased space between columns */
-  flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px; /* Space between columns */
 }
 
 .dashboard-column {
   display: flex;
   flex-direction: column;
-  gap: 25px; /* Increased space between cards within a column */
+  gap: 25px; /* Space between cards within a column */
 }
 
-.left-column {
-  flex: 1 1 280px; /* Flex grow, shrink, basis. Basis helps with responsiveness */
-  min-width: 280px;
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 }
 
 .center-column {
-  flex: 2 1 400px;
-  min-width: 300px; /* Ensure it doesn't get too squished */
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  grid-column: span 2;
 }
 
-.right-column {
-  flex: 1 1 280px;
-  min-width: 280px;
+@media (max-width: 800px) {
+  .center-column {
+    grid-column: span 1;
+  }
 }
 
 /* Card specific styles */
@@ -222,9 +238,43 @@ export default {
    width: 100%;
 }
 
-.campaigns-card .btn {
+.campaigns-card > .btn {
   margin-top: 15px;
   width: 100%; /* Make button full width */
+}
+
+.campaign-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 15px;
+}
+.campaign-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-buttons-end);
+}
+.campaign-item:last-child {
+  border-bottom: none;
+}
+.campaign-info {
+  flex: 1;
+}
+.campaign-description {
+  margin: 5px 0 0 0;
+  font-size: var(--font-size-lists-events);
+  color: var(--color-text-secondary);
+}
+.campaign-actions {
+  display: flex;
+  gap: 10px;
+}
+.btn-danger {
+  background-color: #d9534f;
+}
+.btn-danger:hover {
+  background-color: #c9302c;
 }
 
 .subscriptions-card .btn-secondary {
@@ -283,17 +333,9 @@ export default {
    /* other properties like padding, color, bg-color are global */
 }
 
-@media (max-width: 1024px) { /* Breakpoint for larger tablets or smaller desktop views */
-  .dashboard-main-content {
-    flex-direction: column; /* Stack columns */
-  }
-  .left-column, .center-column, .right-column {
-    flex-basis: auto; /* Reset flex-basis to allow natural sizing in column flow */
-    width: 100%; /* Each column takes full width */
-    min-width: unset; /* Reset min-width if it causes issues in column layout */
-  }
+@media (max-width: 1024px) { /* Breakpoint for tablets */
   .center-column {
-    order: -1; /* Optionally move center column (e.g., map) to top on mobile */
+    grid-column: span 1;
   }
 }
 
