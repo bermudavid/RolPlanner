@@ -15,6 +15,9 @@ export class Campaign {
   @Column({ type: 'jsonb', nullable: true }) // Or string, as per requirement
   map_details: any; // Can be a more specific type if map structure is known
 
+  @Column({ nullable: true })
+  model_path?: string;
+
   @ManyToOne(() => User)
   master: User;
 
