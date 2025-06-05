@@ -24,12 +24,10 @@
         </div>
         <div class="card active-campaigns-card">
           <h2 class="card-title">My Active Campaigns</h2>
-          <p>You are currently participating in <strong>"The Dragon's Curse"</strong>.</p>
-          <ul>
-            <li>Campaign: The Dragon's Curse - Session 5 ongoing. Next session: Tomorrow at 7 PM.</li>
-            <li>Campaign: Secrets of the Old Forest - Awaiting Game Master to schedule next session.</li>
+          <ul class="campaign-list">
+            <li v-if="activeCampaigns.length === 0">You are not part of any campaign.</li>
+            <li v-for="c in activeCampaigns" :key="c.id">{{ c.name }}</li>
           </ul>
-          <button class="btn">View Campaign Details</button>
         </div>
 
         <div class="card character-summary-card">
@@ -60,15 +58,44 @@ import api from '../api';
 export default {
   name: 'PlayerDashboardPage',
   data() {
-    return { sessions: [] };
+    return {
+      sessions: [],
+      activeCampaigns: [],
+      userId: null,
+    };
   },
   created() {
+    this.decodeToken();
     this.fetchSessions();
   },
   methods: {
+    decodeToken() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          this.userId = payload.sub;
+        } catch (e) {
+          console.error('Error decoding token for user ID:', e);
+        }
+      }
+    },
     async fetchSessions() {
-      const { data } = await api.get('/sessions');
-      this.sessions = data;
+      try {
+        const { data } = await api.get('/sessions');
+        this.sessions = data;
+        const campaigns = {};
+        data.forEach(s => {
+          if (s.active_players.some(p => p.id === this.userId)) {
+            campaigns[s.campaign.id] = s.campaign;
+          }
+        });
+        this.activeCampaigns = Object.values(campaigns);
+      } catch (e) {
+        console.error('Failed to fetch sessions:', e);
+        this.sessions = [];
+        this.activeCampaigns = [];
+      }
     },
     async joinSession(session) {
       let body = {};
