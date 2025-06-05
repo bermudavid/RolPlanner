@@ -28,7 +28,7 @@ describe('AppController (e2e)', () => {
 
   it('/ (GET)', () => {
     return request(app.getHttpServer())
-      .get('/') // This will fail if global prefix 'api' is set and not accounted for here
+      .get('/api/') // Adjusted to account for the global 'api' prefix
       .expect(200)
       .expect('Hello World!'); // Assuming AppService still returns this
   });
