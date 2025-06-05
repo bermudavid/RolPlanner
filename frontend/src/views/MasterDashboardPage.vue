@@ -188,30 +188,35 @@ export default {
 }
 
 .dashboard-main-content {
-  display: flex;
-  gap: 25px; /* Increased space between columns */
-  flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px; /* Space between columns */
 }
 
 .dashboard-column {
   display: flex;
   flex-direction: column;
-  gap: 25px; /* Increased space between cards within a column */
+  gap: 25px; /* Space between cards within a column */
 }
 
-.left-column {
-  flex: 1 1 280px; /* Flex grow, shrink, basis. Basis helps with responsiveness */
-  min-width: 280px;
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 }
 
 .center-column {
-  flex: 2 1 400px;
-  min-width: 300px; /* Ensure it doesn't get too squished */
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  grid-column: span 2;
 }
 
-.right-column {
-  flex: 1 1 280px;
-  min-width: 280px;
+@media (max-width: 800px) {
+  .center-column {
+    grid-column: span 1;
+  }
 }
 
 /* Card specific styles */
@@ -283,17 +288,9 @@ export default {
    /* other properties like padding, color, bg-color are global */
 }
 
-@media (max-width: 1024px) { /* Breakpoint for larger tablets or smaller desktop views */
-  .dashboard-main-content {
-    flex-direction: column; /* Stack columns */
-  }
-  .left-column, .center-column, .right-column {
-    flex-basis: auto; /* Reset flex-basis to allow natural sizing in column flow */
-    width: 100%; /* Each column takes full width */
-    min-width: unset; /* Reset min-width if it causes issues in column layout */
-  }
+@media (max-width: 1024px) { /* Breakpoint for tablets */
   .center-column {
-    order: -1; /* Optionally move center column (e.g., map) to top on mobile */
+    grid-column: span 1;
   }
 }
 
