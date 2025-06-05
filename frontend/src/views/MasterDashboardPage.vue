@@ -13,7 +13,22 @@
         <div class="card campaigns-card">
           <h2 class="card-title">Campaigns</h2>
           <p>Manage your game campaigns, create new adventures, and track ongoing stories.</p>
-          <button class="btn">New Campaign</button>
+          <button class="btn" @click="showForm = !showForm">New Campaign</button>
+          <form v-if="showForm" @submit.prevent="createCampaign" class="campaign-form">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input id="name" v-model="name" required />
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" v-model="description"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="model">GLTF Model</label>
+              <input id="model" type="file" @change="onFileChange" />
+            </div>
+            <button type="submit" class="btn">Save</button>
+          </form>
         </div>
 
         <div class="card event-manager-card">
@@ -64,9 +79,42 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'MasterDashboardPage',
-  // Add methods or data properties if needed for interactivity
+  data() {
+    return {
+      showForm: false,
+      name: '',
+      description: '',
+      file: null,
+    };
+  },
+  methods: {
+    onFileChange(e) {
+      this.file = e.target.files[0];
+    },
+    async createCampaign() {
+      const formData = new FormData();
+      formData.append('name', this.name);
+      formData.append('description', this.description);
+      if (this.file) {
+        formData.append('model', this.file);
+      }
+      const token = localStorage.getItem('token');
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/campaigns`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      this.showForm = false;
+      this.name = '';
+      this.description = '';
+      this.file = null;
+    },
+  },
 };
 </script>
 

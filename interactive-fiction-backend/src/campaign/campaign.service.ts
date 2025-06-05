@@ -11,7 +11,13 @@ export class CampaignService {
     private campaignsRepository: Repository<Campaign>,
   ) {}
 
-  async create(name: string, description: string, map_details: any, master: User): Promise<Campaign> {
+  async create(
+    name: string,
+    description: string,
+    map_details: any,
+    master: User,
+    model_path?: string,
+  ): Promise<Campaign> {
     if (master.role !== UserRole.MASTER) {
       throw new UnauthorizedException('Only Masters can create campaigns.');
     }
@@ -19,6 +25,7 @@ export class CampaignService {
       name,
       description,
       map_details,
+      model_path,
       master_id: master.id,
       master, // Store the user object as well for easier access if needed
     });
@@ -37,7 +44,14 @@ export class CampaignService {
     return campaign;
   }
 
-  async update(id: number, name: string, description: string, map_details: any, user: User): Promise<Campaign> {
+  async update(
+    id: number,
+    name: string,
+    description: string,
+    map_details: any,
+    user: User,
+    model_path?: string,
+  ): Promise<Campaign> {
     const campaign = await this.findOne(id);
     if (campaign.master_id !== user.id || user.role !== UserRole.MASTER) {
       throw new UnauthorizedException('You are not authorized to update this campaign.');
@@ -45,6 +59,9 @@ export class CampaignService {
     campaign.name = name;
     campaign.description = description;
     campaign.map_details = map_details;
+    if (model_path) {
+      campaign.model_path = model_path;
+    }
     return this.campaignsRepository.save(campaign);
   }
 
