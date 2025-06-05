@@ -1,16 +1,16 @@
 <template>
   <div id="app"> 
       <header class="global-header">
-         <nav class="global-nav">
-            <ul class="nav-list">
-              <li class="nav-item"><router-link to="/" class="nav-link">Home</router-link></li>
-              <li class="nav-item" v-if="!isLoggedIn"><router-link to="/login" class="nav-link">Login</router-link></li>
-              <li class="nav-item" v-if="!isLoggedIn"><router-link to="/register" class="nav-link">Register</router-link></li>
-              <li class="nav-item" v-if="isMaster"><router-link to="/master/dashboard" class="nav-link">Master Dashboard</router-link></li>
-              <li class="nav-item" v-if="isPlayer"><router-link to="/player/dashboard" class="nav-link">Player Dashboard</router-link></li>
-              <li class="nav-item" v-if="isLoggedIn"><button @click="logout" class="nav-link logout-button">Logout</button></li>
-            </ul>
+        <nav class="global-nav">
+          <ul class="nav-list">
+            <li class="nav-item"><router-link to="/" class="nav-link">Home</router-link></li>
+            <li class="nav-item" v-if="!isLoggedIn"><router-link to="/login" class="nav-link">Login</router-link></li>
+            <li class="nav-item" v-if="!isLoggedIn"><router-link to="/register" class="nav-link">Register</router-link></li>
+            <li class="nav-item" v-if="isMaster"><router-link to="/master/dashboard" class="nav-link">Master Dashboard</router-link></li>
+            <li class="nav-item" v-if="isPlayer"><router-link to="/player/dashboard" class="nav-link">Player Dashboard</router-link></li>
+          </ul>
         </nav>
+        <button v-if="isLoggedIn" @click="logout" class="btn logout-button">Logout</button>
       </header>
     <main class="main-content page-container">
       <router-view />
@@ -77,24 +77,20 @@ export default {
   background: linear-gradient(45deg,
       var(--color-cards-panels),
       var(--color-buttons-end));
-  padding: 15px 30px; /* Vertical padding, horizontal padding */
+  padding: 15px 30px;
   border-bottom: 1px solid var(--color-accent-gold);
   box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-  /* Ensure it spans full width if #app has max-width and margin auto for centering content */
-  /* This might require #app to not have padding that restricts header width, */
-  /* or header to be outside the main centered content of #app if that's the case */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .global-nav {
   display: flex;
-  justify-content: flex-start; /* Align links to the start */
+  justify-content: flex-start;
   align-items: center;
-  gap: 25px; /* Space between nav links */
-  /* If #app is centered with max-width, this nav will also be within that centered block. */
-  /* If header needs to be full-width while page content is centered, structure of #app might need review. */
-  /* For now, assuming #app allows header to appear as a top bar. */
-  max-width: 1280px; /* Align with typical max-width for content if needed */
-  margin: 0 auto; /* Center nav content if header is full-width */
+  gap: 25px;
+  width: 100%;
 }
 
 .nav-list {
@@ -131,11 +127,7 @@ export default {
   border-bottom-color: var(--color-accent-gold); /* Or a more prominent accent color */
 }
 
-/* Example for a logout button if it were styled as a nav-link */
 .logout-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  /* Inherits .nav-link styles if class is combined, or define separately */
+  margin-left: 15px;
 }
 </style>
