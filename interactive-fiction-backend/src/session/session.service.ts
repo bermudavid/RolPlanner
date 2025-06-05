@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EventDto } from './dto/event.dto';
 import { Session, SessionStatus } from './session.entity';
 import { User, UserRole } from '../user/user.entity';
 import { Campaign } from '../campaign/campaign.entity';
@@ -124,29 +123,4 @@ export class SessionService {
   }
 
   private readonly logger = new Logger(SessionService.name);
-
-  async broadcastEventToSession(sessionId: number, eventDto: EventDto, masterUser: User): Promise<void> {
-    const session = await this.getSessionById(sessionId); // Leverages existing method with relations
-
-    if (!session) {
-      throw new NotFoundException(`Session with ID ${sessionId} not found.`);
-    }
-
-    if (session.master_id !== masterUser.id || masterUser.role !== UserRole.MASTER) {
-      throw new UnauthorizedException('You are not authorized to send an event to this session.');
-    }
-    
-    if (session.status !== SessionStatus.ACTIVE) {
-      // Optional: Decide if masters can send events to PENDING or ENDED sessions.
-      // For now, let's assume only to ACTIVE sessions.
-      // throw new BadRequestException('Events can only be sent to active sessions.');
-    }
-
-    // MVP: Log the event. In the future, this would involve WebSockets.
-    this.logger.log(
-      `Event for session ${sessionId} by Master ${masterUser.username} (ID: ${masterUser.id}): "${eventDto.message}"`,
-    );
-    
-    // No return value needed for this MVP step as we are not persisting or directly responding with event data here.
-  }
 }

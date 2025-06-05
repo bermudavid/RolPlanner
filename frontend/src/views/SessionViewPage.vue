@@ -45,10 +45,7 @@
         <div class="card event-log-card">
           <h2 class="card-title">Event Log</h2>
           <ul>
-            <li>Seraphina identified a faint magical aura around the figure.</li>
-            <li>Grom noticed the barkeep seems nervous.</li>
-            <li>Elara spotted a hidden clue on one of the wanted posters.</li>
-            <li>Session "The Tavern of Secrets" started.</li>
+            <li v-for="(evt, idx) in eventLog" :key="idx">{{ evt }}</li>
           </ul>
         </div>
       </aside>
@@ -58,6 +55,7 @@
 
 <script>
 // import MapViewer from '../components/MapViewer.vue'; // If MapViewer is to be re-integrated
+import { io } from 'socket.io-client';
 
 export default {
   name: 'SessionViewPage',
@@ -66,6 +64,8 @@ export default {
     return {
       sessionId: null,
       sessionName: "[Placeholder Session Name]", // Could be fetched
+      eventLog: [],
+      socket: null,
       // userRole: null, // Example if needed for conditional rendering not shown in template
     };
   },
@@ -80,6 +80,17 @@ export default {
     // In a real app, fetch session details here using this.sessionId
     // For example: this.fetchSessionDetails();
     // this.determineUserRole();
+
+    this.socket = io('http://localhost:3000/sessions');
+    this.socket.emit('joinSession', { sessionId: this.sessionId });
+    this.socket.on('sessionEvent', payload => {
+      this.eventLog.unshift(payload.message);
+    });
+  },
+  beforeUnmount() {
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
   methods: {
     // determineUserRole() {
