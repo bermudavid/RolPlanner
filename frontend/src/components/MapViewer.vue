@@ -27,6 +27,7 @@ export default {
       renderer: null,
       controls: null,
       animationFrameId: null,
+      resizeObserver: null,
       socket: null,
     };
   },
@@ -103,6 +104,10 @@ export default {
 
       // Handle resize
       window.addEventListener('resize', this.onWindowResize);
+      this.resizeObserver = new ResizeObserver(() => {
+        this.onWindowResize();
+      });
+      this.resizeObserver.observe(container);
     },
 
     loadModel() {
@@ -195,6 +200,11 @@ export default {
 
     cleanupThree() {
       window.removeEventListener('resize', this.onWindowResize);
+      if (this.resizeObserver && this.$refs.mapContainer) {
+        this.resizeObserver.unobserve(this.$refs.mapContainer);
+        this.resizeObserver.disconnect();
+      }
+      this.resizeObserver = null;
       if (this.animationFrameId) {
         cancelAnimationFrame(this.animationFrameId);
       }
@@ -270,7 +280,7 @@ export default {
 <style scoped>
 .map-viewer-container {
   width: 100%;
-  height: 500px; /* Adjust as needed */
+  height: 100%;
   border: 1px solid #ccc;
 }
 </style>
