@@ -74,10 +74,12 @@ export default {
 <style scoped>
 /* New styles for the global header and navigation */
 .global-header {
-  background-color: var(--color-cards-panels); /* Using card color for header bg */
+  background: linear-gradient(45deg,
+      var(--color-cards-panels),
+      var(--color-buttons-end));
   padding: 15px 30px; /* Vertical padding, horizontal padding */
-  border-bottom: 1px solid var(--color-accent-blue);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  border-bottom: 1px solid var(--color-accent-gold);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
   /* Ensure it spans full width if #app has max-width and margin auto for centering content */
   /* This might require #app to not have padding that restricts header width, */
   /* or header to be outside the main centered content of #app if that's the case */
@@ -107,14 +109,14 @@ export default {
 }
 
 .nav-link:hover {
-  color: var(--color-text-primary);
-  border-bottom-color: var(--color-accent-blue);
+  color: var(--color-accent-gold);
+  border-bottom-color: var(--color-accent-gold);
 }
 
 .nav-link.router-link-exact-active { /* Styling for the active link */
-  color: var(--color-text-primary);
+  color: var(--color-accent-gold);
   font-weight: bold; /* Bolder for active link */
-  border-bottom-color: var(--color-text-primary); /* Or a more prominent accent color */
+  border-bottom-color: var(--color-accent-gold); /* Or a more prominent accent color */
 }
 
 /* Example for a logout button if it were styled as a nav-link */

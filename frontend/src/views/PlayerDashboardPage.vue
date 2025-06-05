@@ -73,7 +73,7 @@ export default {
   font-family: var(--font-primary);
   font-size: var(--font-size-buttons); /* Using button font size */
   color: var(--color-text-primary); /* Primary text for better visibility */
-  background-color: var(--color-buttons); /* Using button color */
+  background-color: var(--color-buttons-end); /* Using button color */
   padding: 10px 18px; /* Adjusted padding */
   border-radius: 6px;
   border: 1px solid var(--color-accent-blue);
@@ -113,7 +113,7 @@ export default {
 .active-campaigns-card li,
 .recent-activity-card li {
   padding: 10px 5px; /* Adjusted padding */
-  border-bottom: 1px solid var(--color-buttons);
+  border-bottom: 1px solid var(--color-buttons-end);
   line-height: 1.5; /* Improve readability */
 }
 
