@@ -3,17 +3,15 @@ import { diskStorage, StorageEngine } from 'multer';
 import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
-import { exec as execCb } from 'child_process';
-import { promisify } from 'util';
-
-const exec = promisify(execCb);
 
 // Decompression library is ESM only. Use dynamic import to avoid commonjs issues.
 type Decompress = (input: Buffer, output: string) => Promise<unknown>;
 
 // Lazily load the decompress function when needed
+// Using eval avoids TypeScript transforming the dynamic import into a CJS
+// require, which would fail because the library is ESM only.
 async function getDecompress(): Promise<Decompress> {
-  const mod = await import('@xhmikosr/decompress');
+  const mod = await eval("import('@xhmikosr/decompress')");
   return (mod.default ?? mod) as Decompress;
 }
 
