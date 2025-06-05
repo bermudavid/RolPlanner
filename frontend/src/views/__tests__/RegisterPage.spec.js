@@ -70,7 +70,7 @@ describe('RegisterPage.vue', () => {
     vi.advanceTimersByTime(2000); // As per component's setTimeout
     vi.useRealTimers();
 
-    expect(wrapper.find('.success').text()).toContain('Registration successful!');
+    expect(wrapper.find('.success-message').text()).toContain('Registration successful!');
     expect(mockPush).toHaveBeenCalledWith('/login');
   });
 
@@ -86,7 +86,7 @@ describe('RegisterPage.vue', () => {
     expect(axios.post).toHaveBeenCalledTimes(1);
 
     await wrapper.vm.$nextTick(); // Wait for error message to render
-    expect(wrapper.find('.error').text()).toBe('Username already exists');
+    expect(wrapper.find('.error-message').text()).toBe('Username already exists');
     expect(mockPush).not.toHaveBeenCalled();
   });
 
@@ -98,6 +98,6 @@ describe('RegisterPage.vue', () => {
     await wrapper.find('form').trigger('submit.prevent');
 
     await wrapper.vm.$nextTick();
-    expect(wrapper.find('.error').text()).toBe('Registration failed. Please try again.');
+    expect(wrapper.find('.error-message').text()).toBe('Registration failed. Please try again.');
   });
 });

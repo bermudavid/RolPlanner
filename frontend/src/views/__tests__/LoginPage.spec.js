@@ -116,7 +116,7 @@ describe('LoginPage.vue', () => {
     expect(axios.post).toHaveBeenCalledTimes(1);
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.find('.error').text()).toBe('Invalid credentials');
+    expect(wrapper.find('.error-message').text()).toBe('Invalid credentials');
     expect(mockLocalStorage.setItem).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -141,7 +141,7 @@ describe('LoginPage.vue', () => {
     await wrapper.vm.$nextTick(); // for axios promise
     await wrapper.vm.$nextTick(); // for logic after promise
 
-    expect(wrapper.find('.error').text()).toContain('Login successful, but could not determine user role.');
+    expect(wrapper.find('.error-message').text()).toContain('Login successful, but could not determine user role.');
     expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('token');
     expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining('dashboard'));
 
