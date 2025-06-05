@@ -309,6 +309,7 @@ export default {
 .map-viewer-container {
   width: 100%;
   height: 100%;
+  min-height: 400px; /* ensure canvas has space so WebGL framebuffer isn't zero */
   border: 1px solid #ccc;
 }
 
