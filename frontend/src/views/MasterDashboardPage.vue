@@ -53,6 +53,28 @@
           </ul>
         </div>
 
+        <div class="card sessions-card">
+          <h2 class="card-title">Sessions</h2>
+          <ul class="campaign-list">
+            <li v-for="s in sessions" :key="s.id" class="campaign-item">
+              <div class="campaign-info">
+                <strong>{{ s.name }}</strong>
+                <p class="campaign-description">Campaign: {{ s.campaign.name }}</p>
+                <p class="campaign-description">Status: {{ s.status }}</p>
+              </div>
+              <div class="campaign-actions">
+                <button
+                  v-if="s.status === 'Pending'"
+                  class="btn"
+                  @click="startSession(s.id)"
+                >
+                  Start
+                </button>
+              </div>
+            </li>
+          </ul>
+        </div>
+
         <div class="card event-manager-card">
           <h2 class="card-title">Recent Events</h2>
           <ul>
@@ -114,11 +136,13 @@ export default {
       password: '',
       isPublic: true,
       campaigns: [],
+      sessions: [],
       joinLink: '',
     };
   },
   created() {
     this.fetchCampaigns();
+    this.fetchSessions();
   },
   methods: {
     onFileChange(e) {
@@ -155,6 +179,10 @@ export default {
       const { data } = await api.get('/campaigns');
       this.campaigns = data;
     },
+    async fetchSessions() {
+      const { data } = await api.get('/sessions');
+      this.sessions = data;
+    },
     openCampaign(id) {
       this.$router.push(`/campaign/${id}/edit`);
     },
@@ -162,6 +190,10 @@ export default {
       if (!confirm('Delete this campaign?')) return;
       await api.delete(`/campaigns/${id}`);
       await this.fetchCampaigns();
+    },
+    async startSession(id) {
+      await api.patch(`/sessions/${id}/start`);
+      await this.fetchSessions();
     },
   },
 };

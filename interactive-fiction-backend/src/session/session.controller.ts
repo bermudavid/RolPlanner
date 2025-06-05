@@ -53,6 +53,12 @@ export class SessionController {
     return this.sessionService.leaveSession(id, req.user);
   }
 
+  @Patch(':id/start')
+  @Roles(UserRole.MASTER)
+  startSession(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    return this.sessionService.startSession(id, req.user);
+  }
+
   @Patch(':id/end') // Using PATCH as it's a partial update (status change)
   @Roles(UserRole.MASTER)
   endSession(@Param('id', ParseIntPipe) id: number, @Request() req) {
