@@ -135,6 +135,18 @@ export class SessionService {
     return this.sessionsRepository.save(session);
   }
 
+  async startSession(sessionId: number, master: User): Promise<Session> {
+    const session = await this.getSessionById(sessionId);
+    if (session.master_id !== master.id || master.role !== UserRole.MASTER) {
+      throw new UnauthorizedException('You are not authorized to start this session.');
+    }
+    if (session.status !== SessionStatus.PENDING) {
+      throw new BadRequestException('Only pending sessions can be started.');
+    }
+    session.status = SessionStatus.ACTIVE;
+    return this.sessionsRepository.save(session);
+  }
+
   async endSession(sessionId: number, master: User): Promise<Session> {
     const session = await this.getSessionById(sessionId);
     if (session.master_id !== master.id || master.role !== UserRole.MASTER) {

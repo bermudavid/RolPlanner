@@ -72,13 +72,20 @@ describe('SessionController (e2e)', () => {
     await app.close();
   });
 
-  it('allows a Master to create and end a session', async () => {
+  it('allows a Master to create, start and end a session', async () => {
     const createRes = await request(app.getHttpServer())
       .post('/api/sessions')
       .set('Authorization', `Bearer ${masterToken}`)
       .send({ name: 'Session 1', campaign_id: campaignId })
       .expect(201);
     sessionId = createRes.body.id;
+
+    const startRes = await request(app.getHttpServer())
+      .patch(`/api/sessions/${sessionId}/start`)
+      .set('Authorization', `Bearer ${masterToken}`)
+      .expect(200);
+
+    expect(startRes.body.status).toBe('Active');
 
     const endRes = await request(app.getHttpServer())
       .patch(`/api/sessions/${sessionId}/end`)

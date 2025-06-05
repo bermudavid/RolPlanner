@@ -22,6 +22,27 @@
             </li>
           </ul>
         </div>
+        <div class="card campaigns-card">
+          <h2 class="card-title">Available Campaigns</h2>
+          <ul class="campaign-list">
+            <li v-for="c in campaigns" :key="c.id" class="campaign-item">
+              <div class="campaign-info">
+                <strong>{{ c.name }}</strong>
+                <p class="campaign-description">{{ c.description }}</p>
+              </div>
+              <div class="campaign-actions">
+                <button
+                  v-if="campaignSessionId(c)"
+                  class="btn"
+                  @click="joinCampaign(c)"
+                >
+                  Join
+                </button>
+                <span v-else>No sessions yet</span>
+              </div>
+            </li>
+          </ul>
+        </div>
         <div class="card active-campaigns-card">
           <h2 class="card-title">My Active Campaigns</h2>
           <ul class="campaign-list">
@@ -60,6 +81,7 @@ export default {
   data() {
     return {
       sessions: [],
+      campaigns: [],
       activeCampaigns: [],
       userId: null,
     };
@@ -67,6 +89,7 @@ export default {
   created() {
     this.decodeToken();
     this.fetchSessions();
+    this.fetchCampaigns();
   },
   methods: {
     decodeToken() {
@@ -97,6 +120,15 @@ export default {
         this.activeCampaigns = [];
       }
     },
+    async fetchCampaigns() {
+      try {
+        const { data } = await api.get('/campaigns');
+        this.campaigns = data;
+      } catch (e) {
+        console.error('Failed to fetch campaigns:', e);
+        this.campaigns = [];
+      }
+    },
     async joinSession(session) {
       let body = {};
       if (!session.campaign.is_public) {
@@ -105,6 +137,21 @@ export default {
       }
       await api.post(`/sessions/${session.id}/join`, body);
       await this.fetchSessions();
+    },
+    campaignSessionId(campaign) {
+      const session = this.sessions.find(
+        s =>
+          s.campaign.id === campaign.id &&
+          (s.status === 'Pending' || s.status === 'Active')
+      );
+      return session ? session.id : null;
+    },
+    joinCampaign(campaign) {
+      const id = this.campaignSessionId(campaign);
+      if (id) {
+        const session = this.sessions.find(s => s.id === id);
+        this.joinSession(session);
+      }
     },
   }
 };
@@ -181,6 +228,34 @@ export default {
 .session-campaign,
 .session-status {
   font-size: 0.9em;
+}
+
+.campaign-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 15px;
+}
+.campaign-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-buttons-end);
+}
+.campaign-item:last-child {
+  border-bottom: none;
+}
+.campaign-info {
+  flex: 1;
+}
+.campaign-description {
+  margin: 5px 0 0 0;
+  font-size: var(--font-size-lists-events);
+  color: var(--color-text-secondary);
+}
+.campaign-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .active-campaigns-card .btn,
