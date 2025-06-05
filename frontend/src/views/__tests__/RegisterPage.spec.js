@@ -9,10 +9,10 @@ if (typeof atob === 'undefined') { // atob is also used in LoginPage.vue
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import RegisterPage from '../RegisterPage.vue'; // Adjust path as needed
-import axios from 'axios';
+import api from '../../api';
 
-// Mock axios
-vi.mock('axios');
+// Mock api instance
+vi.mock('../../api');
 
 // Mock vue-router
 const mockPush = vi.fn();
@@ -51,14 +51,14 @@ describe('RegisterPage.vue', () => {
   });
 
   it('submits the form and calls the register API successfully, then navigates', async () => {
-    axios.post.mockResolvedValue({ data: { message: 'Registration successful' } });
+    api.post.mockResolvedValue({ data: { message: 'Registration successful' } });
 
     await wrapper.find('input#username').setValue('testuser');
     await wrapper.find('input#password').setValue('password123');
     await wrapper.find('select#role').setValue('Player');
     await wrapper.find('form').trigger('submit.prevent');
 
-    expect(axios.post).toHaveBeenCalledWith(
+    expect(api.post).toHaveBeenCalledWith(
       'http://localhost:3000/api/auth/register',
       { username: 'testuser', password: 'password123', role: 'Player' }
     );
@@ -75,7 +75,7 @@ describe('RegisterPage.vue', () => {
   });
 
   it('displays an error message if registration API call fails', async () => {
-    axios.post.mockRejectedValue({
+    api.post.mockRejectedValue({
       response: { data: { message: 'Username already exists' } }
     });
 
@@ -83,7 +83,7 @@ describe('RegisterPage.vue', () => {
     await wrapper.find('input#password').setValue('password123');
     await wrapper.find('form').trigger('submit.prevent');
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(api.post).toHaveBeenCalledTimes(1);
 
     await wrapper.vm.$nextTick(); // Wait for error message to render
     expect(wrapper.find('.error-message').text()).toBe('Username already exists');
@@ -91,7 +91,7 @@ describe('RegisterPage.vue', () => {
   });
 
   it('displays a generic error message if API error response is not structured as expected', async () => {
-    axios.post.mockRejectedValue(new Error('Network Error')); // Simulate a different error
+    api.post.mockRejectedValue(new Error('Network Error')); // Simulate a different error
 
     await wrapper.find('input#username').setValue('testuser');
     await wrapper.find('input#password').setValue('password123');
