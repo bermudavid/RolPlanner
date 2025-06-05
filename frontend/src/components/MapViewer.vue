@@ -337,6 +337,7 @@ export default {
   to {
     transform: rotate(360deg);
   }
+}
 .error-message {
   color: #ff6b6b;
   background-color: rgba(255, 107, 107, 0.1);
