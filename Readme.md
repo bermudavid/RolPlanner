@@ -89,6 +89,12 @@
 - **Compatible con móvil** (al menos visor de mapas).
 - **Multiventana**: No es un videojuego. Puedes tener abiertas varias ventanas, solo una renderiza el mapa.
 
+### Carga de modelos 3D
+
+El backend acepta archivos `.glb`/`.gltf` de forma directa o un paquete `.zip` que
+contenga el modelo y sus texturas. Si se sube un zip, el servidor lo descomprime
+automáticamente y sirve el contenido desde `/models/<uuid>/`.
+
 ---
 
 ## 🚧 Estado del proyecto
