@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Request, ParseIntPipe, Patch, HttpCode, HttpStatus } from '@nestjs/common';
 import { SessionService } from './session.service';
+import { SessionGateway } from './session.gateway';
 import { AuthGuard } from '@nestjs/passport';
 import { EventDto } from './dto/event.dto';
 import { UserRole } from '../user/user.entity';
@@ -9,7 +10,10 @@ import { RolesGuard } from '../auth/roles.guard';
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('sessions')
 export class SessionController {
-  constructor(private readonly sessionService: SessionService) {}
+  constructor(
+    private readonly sessionService: SessionService,
+    private readonly sessionGateway: SessionGateway,
+  ) {}
 
   @Post()
   @Roles(UserRole.MASTER)
@@ -55,7 +59,7 @@ export class SessionController {
     @Request() req,
   ) {
     // req.user is the authenticated User object from JwtStrategy
-    await this.sessionService.broadcastEventToSession(sessionId, eventDto, req.user);
+    await this.sessionGateway.broadcastEventToSession(sessionId, eventDto, req.user);
     return { message: 'Event broadcast initiated.' }; // Or simply return nothing for 204 No Content
   }
 }
