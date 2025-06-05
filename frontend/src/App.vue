@@ -1,17 +1,17 @@
 <template>
   <div id="app"> 
-    <header class="global-header"> 
-       <nav class="global-nav">
-          <ul>
-            <li><router-link to="/">Home</router-link></li>
-            <li v-if="!isLoggedIn"><router-link to="/login">Login</router-link></li>
-            <li v-if="!isLoggedIn"><router-link to="/register">Register</router-link></li>
-            <li v-if="isMaster"><router-link to="/master/dashboard">Master Dashboard</router-link></li>
-            <li v-if="isPlayer"><router-link to="/player/dashboard">Player Dashboard</router-link></li>
-            <li v-if="isLoggedIn"><button @click="logout">Logout</button></li>
-          </ul> 
-      </nav>
-    </header>
+      <header class="global-header">
+         <nav class="global-nav">
+            <ul class="nav-list">
+              <li class="nav-item"><router-link to="/" class="nav-link">Home</router-link></li>
+              <li class="nav-item" v-if="!isLoggedIn"><router-link to="/login" class="nav-link">Login</router-link></li>
+              <li class="nav-item" v-if="!isLoggedIn"><router-link to="/register" class="nav-link">Register</router-link></li>
+              <li class="nav-item" v-if="isMaster"><router-link to="/master/dashboard" class="nav-link">Master Dashboard</router-link></li>
+              <li class="nav-item" v-if="isPlayer"><router-link to="/player/dashboard" class="nav-link">Player Dashboard</router-link></li>
+              <li class="nav-item" v-if="isLoggedIn"><button @click="logout" class="nav-link logout-button">Logout</button></li>
+            </ul>
+        </nav>
+      </header>
     <main class="main-content page-container">
       <router-view />
     </main>
@@ -95,6 +95,18 @@ export default {
   /* For now, assuming #app allows header to appear as a top bar. */
   max-width: 1280px; /* Align with typical max-width for content if needed */
   margin: 0 auto; /* Center nav content if header is full-width */
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 25px;
+}
+
+.nav-item {
+  margin: 0;
 }
 
 .nav-link {
