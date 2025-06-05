@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 // App type was imported from supertest/types, but it's not directly used in the provided snippet for app: INestApplication.
 // INestApplication itself doesn't need a generic type argument if we are not using specific methods from App that require it.
@@ -21,8 +21,8 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    // If main.ts has app.setGlobalPrefix('api'), it should be here too for AppController tests
-    // For now, keeping it as original, but ideally, this GET / would be GET /api/ if prefix is global
+    app.useGlobalPipes(new ValidationPipe());
+    app.setGlobalPrefix('api');
     await app.init();
   });
 
@@ -54,6 +54,7 @@ describe('AuthController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe());
     app.setGlobalPrefix('api'); // Crucial for API endpoint testing
     await app.init();
 
