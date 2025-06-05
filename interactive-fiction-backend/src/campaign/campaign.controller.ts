@@ -98,7 +98,7 @@ export class CampaignController {
       req.user,
       modelPath,
       updateCampaignDto.is_public ?? true,
-      updateCampaignDto.password,
+      updateCampaignDto.password ?? undefined,
     );
   }
 
