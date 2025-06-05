@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
 
 export default {
   name: 'LoginPage',
@@ -34,7 +34,7 @@ export default {
     async login() {
       this.error = ''; // Clear previous errors
       try {
-        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, {
+        const response = await api.post('/auth/login', {
           username: this.username,
           password: this.password,
         });

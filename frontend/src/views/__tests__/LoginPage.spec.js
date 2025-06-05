@@ -9,10 +9,10 @@ if (typeof atob === 'undefined') {
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import LoginPage from '../LoginPage.vue'; // Adjust path as needed
-import axios from 'axios';
+import api from '../../api';
 
-// Mock axios
-vi.mock('axios');
+// Mock api instance
+vi.mock('../../api');
 
 // Mock vue-router
 const mockPush = vi.fn();
@@ -70,13 +70,13 @@ describe('LoginPage.vue', () => {
 
   it('submits the form, calls login API, stores token, decodes role, and navigates for Player', async () => {
     const playerToken = 'fakeTokenPart1.' + btoa(JSON.stringify({ sub: 1, username: 'player', role: 'Player' })) + '.fakeTokenPart3';
-    axios.post.mockResolvedValue({ data: { access_token: playerToken } });
+    api.post.mockResolvedValue({ data: { access_token: playerToken } });
 
     await wrapper.find('input#username').setValue('player');
     await wrapper.find('input#password').setValue('password123');
     await wrapper.find('form').trigger('submit.prevent');
 
-    expect(axios.post).toHaveBeenCalledWith(
+    expect(api.post).toHaveBeenCalledWith(
       'http://localhost:3000/api/auth/login',
       { username: 'player', password: 'password123' }
     );
@@ -88,13 +88,13 @@ describe('LoginPage.vue', () => {
 
   it('submits the form, calls login API, stores token, decodes role, and navigates for Master', async () => {
     const masterToken = 'fakeTokenPart1.' + btoa(JSON.stringify({ sub: 2, username: 'master', role: 'Master' })) + '.fakeTokenPart3';
-    axios.post.mockResolvedValue({ data: { access_token: masterToken } });
+    api.post.mockResolvedValue({ data: { access_token: masterToken } });
 
     await wrapper.find('input#username').setValue('master');
     await wrapper.find('input#password').setValue('password123');
     await wrapper.find('form').trigger('submit.prevent');
 
-    expect(axios.post).toHaveBeenCalledWith(
+    expect(api.post).toHaveBeenCalledWith(
       'http://localhost:3000/api/auth/login',
       { username: 'master', password: 'password123' }
     );
@@ -105,7 +105,7 @@ describe('LoginPage.vue', () => {
   });
 
   it('displays an error message if login API call fails', async () => {
-    axios.post.mockRejectedValue({
+    api.post.mockRejectedValue({
       response: { data: { message: 'Invalid credentials' } }
     });
 
@@ -113,7 +113,7 @@ describe('LoginPage.vue', () => {
     await wrapper.find('input#password').setValue('wrongpassword');
     await wrapper.find('form').trigger('submit.prevent');
 
-    expect(axios.post).toHaveBeenCalledTimes(1);
+    expect(api.post).toHaveBeenCalledTimes(1);
     await wrapper.vm.$nextTick();
 
     expect(wrapper.find('.error-message').text()).toBe('Invalid credentials');
@@ -123,7 +123,7 @@ describe('LoginPage.vue', () => {
 
   it('displays an error and logs out if token decoding fails', async () => {
     const malformedToken = 'malformed.token'; // This token will cause atob to be called with "token"
-    axios.post.mockResolvedValue({ data: { access_token: malformedToken } });
+    api.post.mockResolvedValue({ data: { access_token: malformedToken } });
 
     // Ensure atob mock from polyfill is used, or override specifically for this test if needed
     // The global polyfill might be sufficient. If specific behavior for 'token' string is needed:

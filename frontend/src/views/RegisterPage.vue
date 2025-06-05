@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
 
 export default {
   name: 'RegisterPage',
@@ -46,7 +46,7 @@ export default {
       this.success = '';
       try {
         // Assuming your API returns some data upon successful registration if needed
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/register`, {
+        await api.post('/auth/register', {
           username: this.username,
           password: this.password,
           role: this.role,
