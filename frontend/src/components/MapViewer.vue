@@ -1,5 +1,11 @@
 <template>
-  <div ref="mapContainer" class="map-viewer-container"></div>
+  <div class="map-viewer-wrapper">
+    <div ref="mapContainer" class="map-viewer-container"></div>
+    <div v-if="loadingProgress < 1" class="loading-overlay">
+      <div class="spinner" />
+      <p>{{ Math.round(loadingProgress * 100) }}%</p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -22,6 +28,7 @@ export default {
       renderer: null,
       controls: null,
       animationFrameId: null,
+      loadingProgress: 0,
     };
   },
   mounted() {
@@ -91,6 +98,7 @@ export default {
     loadModel() {
       if (!this.modelUrl) return;
 
+      this.loadingProgress = 0;
       const loader = new GLTFLoader();
       loader.load(
         this.modelUrl,
@@ -114,8 +122,13 @@ export default {
 
           this.scene.add(this.loadedModel);
           console.log('Model loaded:', this.modelUrl);
+          this.loadingProgress = 1;
         },
-        undefined, // onProgress callback (optional)
+        (xhr) => {
+          if (xhr.lengthComputable) {
+            this.loadingProgress = xhr.loaded / xhr.total;
+          }
+        },
         (error) => {
           console.error('An error happened during model loading:', error);
         }
@@ -214,9 +227,43 @@ export default {
 </script>
 
 <style scoped>
+.map-viewer-wrapper {
+  position: relative;
+}
+
 .map-viewer-container {
   width: 100%;
   height: 500px; /* Adjust as needed */
   border: 1px solid #ccc;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
