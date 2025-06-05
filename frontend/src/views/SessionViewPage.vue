@@ -7,6 +7,9 @@
 
     <div class="session-main-content">
       <div class="session-column main-column">
+        <div class="card map-view-card" v-if="modelUrl">
+          <MapViewer :model-url="modelUrl" />
+        </div>
         <div class="card story-progression-card">
           <h2 class="card-title">Story Progression</h2>
           <div class="story-text">
@@ -54,16 +57,18 @@
 </template>
 
 <script>
-// import MapViewer from '../components/MapViewer.vue'; // If MapViewer is to be re-integrated
+import MapViewer from '../components/MapViewer.vue';
+import api from '../api';
 import { io } from 'socket.io-client';
 
 export default {
   name: 'SessionViewPage',
-  // components: { MapViewer },
+  components: { MapViewer },
   data() {
     return {
       sessionId: null,
       sessionName: "[Placeholder Session Name]", // Could be fetched
+      modelUrl: null,
       eventLog: [],
       socket: null,
       // userRole: null, // Example if needed for conditional rendering not shown in template
@@ -77,9 +82,7 @@ export default {
   },
   created() {
     this.sessionId = this.$route.params.id;
-    // In a real app, fetch session details here using this.sessionId
-    // For example: this.fetchSessionDetails();
-    // this.determineUserRole();
+    this.fetchSessionDetails();
 
     this.socket = io('http://localhost:3000/sessions');
     this.socket.emit('joinSession', { sessionId: this.sessionId });
@@ -93,6 +96,18 @@ export default {
     }
   },
   methods: {
+    async fetchSessionDetails() {
+      try {
+        const { data } = await api.get(`/sessions/${this.sessionId}`);
+        this.sessionName = data.name;
+        if (data.campaign && data.campaign.model_path) {
+          const base = import.meta.env.VITE_API_BASE_URL.replace(/\/api$/, '');
+          this.modelUrl = `${base}/${data.campaign.model_path}`;
+        }
+      } catch (e) {
+        console.error('Failed to fetch session details:', e);
+      }
+    },
     // determineUserRole() {
     //   const token = localStorage.getItem('token');
     //   if (token) {
@@ -101,10 +116,6 @@ export default {
     //       this.userRole = payload.role;
     //     } catch (e) { console.error('Error decoding token:', e); this.userRole = null; }
     //   }
-    // },
-    // async fetchSessionDetails() {
-    //   // Placeholder: API call to get session name, status, etc.
-    //   // this.sessionName = await api.getSessionName(this.sessionId);
     // }
   }
 };
