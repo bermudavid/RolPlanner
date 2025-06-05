@@ -11,9 +11,13 @@
       <div class="dashboard-column full-width-column">
         <div class="card sessions-card">
           <h2 class="card-title">Available Sessions</h2>
-          <ul>
-            <li v-for="s in sessions" :key="s.id">
-              {{ s.name }} - {{ s.campaign.name }}
+          <ul class="session-list">
+            <li v-for="s in sessions" :key="s.id" class="session-item">
+              <div class="session-info">
+                <strong>{{ s.name }}</strong>
+                <span class="session-campaign">Campaign: {{ s.campaign.name }}</span>
+                <span class="session-status">Status: {{ s.status }}</span>
+              </div>
               <button class="btn" @click="joinSession(s)">Join</button>
             </li>
           </ul>
@@ -123,6 +127,33 @@ export default {
 /* Card specific styles */
 .card {
    width: 100%; /* Ensure cards take full width of the column */
+}
+
+/* Sessions list */
+.session-list {
+  list-style: none;
+  padding-left: 0;
+  font-size: var(--font-size-lists-events);
+  color: var(--color-text-secondary);
+  margin-top: 15px;
+}
+.session-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-buttons-end);
+}
+.session-item:last-child {
+  border-bottom: none;
+}
+.session-info {
+  display: flex;
+  flex-direction: column;
+}
+.session-campaign,
+.session-status {
+  font-size: 0.9em;
 }
 
 .active-campaigns-card .btn,

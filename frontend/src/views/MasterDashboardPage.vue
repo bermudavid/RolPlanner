@@ -40,9 +40,15 @@
             <p v-if="joinLink" class="join-link">Share: {{ joinLink }}</p>
           </form>
           <ul class="campaign-list">
-            <li v-for="c in campaigns" :key="c.id">
-              {{ c.name }}
-              <button class="btn" @click="openCampaign(c.id)">Open</button>
+            <li v-for="c in campaigns" :key="c.id" class="campaign-item">
+              <div class="campaign-info">
+                <strong>{{ c.name }}</strong>
+                <p class="campaign-description">{{ c.description }}</p>
+              </div>
+              <div class="campaign-actions">
+                <button class="btn" @click="openCampaign(c.id)">Open</button>
+                <button class="btn btn-danger" @click="deleteCampaign(c.id)">Delete</button>
+              </div>
             </li>
           </ul>
         </div>
@@ -152,6 +158,11 @@ export default {
     openCampaign(id) {
       this.$router.push(`/campaign/${id}/edit`);
     },
+    async deleteCampaign(id) {
+      if (!confirm('Delete this campaign?')) return;
+      await api.delete(`/campaigns/${id}`);
+      await this.fetchCampaigns();
+    },
   },
 };
 </script>
@@ -227,9 +238,43 @@ export default {
    width: 100%;
 }
 
-.campaigns-card .btn {
+.campaigns-card > .btn {
   margin-top: 15px;
   width: 100%; /* Make button full width */
+}
+
+.campaign-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 15px;
+}
+.campaign-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-buttons-end);
+}
+.campaign-item:last-child {
+  border-bottom: none;
+}
+.campaign-info {
+  flex: 1;
+}
+.campaign-description {
+  margin: 5px 0 0 0;
+  font-size: var(--font-size-lists-events);
+  color: var(--color-text-secondary);
+}
+.campaign-actions {
+  display: flex;
+  gap: 10px;
+}
+.btn-danger {
+  background-color: #d9534f;
+}
+.btn-danger:hover {
+  background-color: #c9302c;
 }
 
 .subscriptions-card .btn-secondary {
