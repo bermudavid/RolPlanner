@@ -1,6 +1,8 @@
-<template>
+<template> 
   <div class="map-viewer-wrapper">
-    <div ref="mapContainer" class="map-viewer-container"></div>
+    <div ref="mapContainer" class="map-viewer-container">
+        <p v-if="modelLoadError" class="error-message">{{ modelLoadError }}</p>
+    </div>
     <div v-if="loadingProgress < 1" class="loading-overlay">
       <div class="spinner" />
       <p>{{ Math.round(loadingProgress * 100) }}%</p>
@@ -12,12 +14,17 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { io } from 'socket.io-client';
 
 export default {
   name: 'MapViewer',
   props: {
     modelUrl: {
       type: String,
+      required: true,
+    },
+    sessionId: {
+      type: Number,
       required: true,
     },
   },
@@ -27,17 +34,31 @@ export default {
       camera: null,
       renderer: null,
       controls: null,
-      animationFrameId: null,
-      loadingProgress: 0,
+      animationFrameId: null, 
+      loadingProgress: 0, 
+      modelLoadError: null,
+      resizeObserver: null,
+      socket: null, 
     };
   },
   mounted() {
     this.initThree();
     this.loadModel();
     this.animate();
+
+    this.socket = io('http://localhost:3000/sessions');
+    this.socket.emit('joinSession', { sessionId: this.sessionId });
+    this.socket.on('cameraUpdate', payload => {
+      if (payload.clientId !== this.socket.id) {
+        this.updatePlayerView(payload.position, payload.quaternion);
+      }
+    });
   },
   beforeUnmount() {
     this.cleanupThree();
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
   watch: {
     modelUrl(newUrl, oldUrl) {
@@ -93,12 +114,19 @@ export default {
 
       // Handle resize
       window.addEventListener('resize', this.onWindowResize);
+      this.resizeObserver = new ResizeObserver(() => {
+        this.onWindowResize();
+      });
+      this.resizeObserver.observe(container);
     },
 
     loadModel() {
       if (!this.modelUrl) return;
-
-      this.loadingProgress = 0;
+ 
+      this.loadingProgress = 0; 
+      // reset any previous error
+      this.modelLoadError = null;
+ 
       const loader = new GLTFLoader();
       loader.load(
         this.modelUrl,
@@ -128,21 +156,48 @@ export default {
           if (xhr.lengthComputable) {
             this.loadingProgress = xhr.loaded / xhr.total;
           }
+          this.modelLoadError = null;
         },
         (error) => {
           console.error('An error happened during model loading:', error);
+          this.modelLoadError = `Failed to load model: ${error?.message || error}`;
         }
       );
     },
     
     cleanupModel() {
-        if (this.loadedModel) {
-            this.scene.remove(this.loadedModel);
-            // You might need to dispose geometries/materials if they are unique to this model
-            // For simplicity here, we assume GLTFLoader handles disposal of its loaded resources
-            // or that models are simple enough not to cause significant memory leaks on reload.
-            this.loadedModel = null;
+      if (!this.loadedModel) return;
+
+      // Traverse the loaded model and dispose geometries, materials and textures
+      this.loadedModel.traverse((child) => {
+        if (child.isMesh) {
+          if (child.geometry) {
+            child.geometry.dispose();
+          }
+
+          if (child.material) {
+            const materials = Array.isArray(child.material)
+              ? child.material
+              : [child.material];
+
+            materials.forEach((mat) => {
+              // dispose textures attached to the material
+              Object.keys(mat).forEach((key) => {
+                const value = mat[key];
+                if (value && value.isTexture) {
+                  value.dispose();
+                }
+              });
+
+              mat.dispose();
+            });
+          }
         }
+      });
+
+      // Remove the model from the scene and clear reference
+      this.scene.remove(this.loadedModel);
+      this.loadedModel = null;
     },
 
     animate() {
@@ -166,6 +221,11 @@ export default {
 
     cleanupThree() {
       window.removeEventListener('resize', this.onWindowResize);
+      if (this.resizeObserver && this.$refs.mapContainer) {
+        this.resizeObserver.unobserve(this.$refs.mapContainer);
+        this.resizeObserver.disconnect();
+      }
+      this.resizeObserver = null;
       if (this.animationFrameId) {
         cancelAnimationFrame(this.animationFrameId);
       }
@@ -206,18 +266,30 @@ export default {
     },
 
     sendCameraData(position, quaternion) {
-      // In a real app, this would send data to the backend (e.g., via WebSockets)
-      console.log('Camera Data (Send):', {
-        position: { x: position.x, y: position.y, z: position.z },
-        quaternion: { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w },
-      });
+      if (this.socket) {
+        this.socket.emit('cameraUpdate', {
+          sessionId: this.sessionId,
+          position: { x: position.x, y: position.y, z: position.z },
+          quaternion: {
+            x: quaternion.x,
+            y: quaternion.y,
+            z: quaternion.z,
+            w: quaternion.w,
+          },
+        });
+      }
     },
 
     updatePlayerView(position, quaternion) {
-      // This would be called when receiving data for other players
-      // For the current user's camera, OrbitControls handles it.
-      // This might be used to update representations of other players' cameras.
-      console.log('Camera Data (Receive for other player):', { position, quaternion });
+      if (this.camera) {
+        this.camera.position.set(position.x, position.y, position.z);
+        this.camera.quaternion.set(
+          quaternion.x,
+          quaternion.y,
+          quaternion.z,
+          quaternion.w,
+        );
+      }
       // Example: if you had an object representing another player's view:
       // otherPlayerCameraObject.position.set(position.x, position.y, position.z);
       // otherPlayerCameraObject.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
@@ -233,7 +305,7 @@ export default {
 
 .map-viewer-container {
   width: 100%;
-  height: 500px; /* Adjust as needed */
+  height: 100%;
   border: 1px solid #ccc;
 }
 
@@ -265,5 +337,14 @@ export default {
   to {
     transform: rotate(360deg);
   }
+.error-message {
+  color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.1);
+  border: 1px solid #ff6b6b;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
 }
 </style>
