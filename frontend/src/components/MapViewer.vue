@@ -1,5 +1,8 @@
 <template>
-  <div ref="mapContainer" class="map-viewer-container"></div>
+  <div>
+    <div ref="mapContainer" class="map-viewer-container"></div>
+    <p v-if="modelLoadError" class="error-message">{{ modelLoadError }}</p>
+  </div>
 </template>
 
 <script>
@@ -27,6 +30,7 @@ export default {
       renderer: null,
       controls: null,
       animationFrameId: null,
+      modelLoadError: null,
       resizeObserver: null,
       socket: null,
     };
@@ -113,6 +117,9 @@ export default {
     loadModel() {
       if (!this.modelUrl) return;
 
+      // reset any previous error
+      this.modelLoadError = null;
+
       const loader = new GLTFLoader();
       loader.load(
         this.modelUrl,
@@ -136,10 +143,12 @@ export default {
 
           this.scene.add(this.loadedModel);
           console.log('Model loaded:', this.modelUrl);
+          this.modelLoadError = null;
         },
         undefined, // onProgress callback (optional)
         (error) => {
           console.error('An error happened during model loading:', error);
+          this.modelLoadError = `Failed to load model: ${error?.message || error}`;
         }
       );
     },
@@ -282,5 +291,16 @@ export default {
   width: 100%;
   height: 100%;
   border: 1px solid #ccc;
+}
+
+.error-message {
+  color: #ff6b6b;
+  background-color: rgba(255, 107, 107, 0.1);
+  border: 1px solid #ff6b6b;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
 }
 </style>
