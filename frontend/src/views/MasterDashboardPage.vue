@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import api from '../api';
 
 export default {
   name: 'MasterDashboardPage',
@@ -102,10 +102,8 @@ export default {
       if (this.file) {
         formData.append('model', this.file);
       }
-      const token = localStorage.getItem('token');
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/campaigns`, formData, {
+      await api.post('/campaigns', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
       });
