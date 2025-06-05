@@ -30,18 +30,19 @@ export default {
   },
   data() {
     return {
-      scene: null,
-      camera: null,
-      renderer: null,
-      controls: null,
-      animationFrameId: null, 
-      loadingProgress: 0, 
+      loadingProgress: 0,
       modelLoadError: null,
-      resizeObserver: null,
-      socket: null, 
     };
   },
   mounted() {
+    this.scene = null;
+    this.camera = null;
+    this.renderer = null;
+    this.controls = null;
+    this.animationFrameId = null;
+    this.resizeObserver = null;
+    this.socket = null;
+    this.loadedModel = null;
     this.initThree();
     this.loadModel();
     this.animate();
