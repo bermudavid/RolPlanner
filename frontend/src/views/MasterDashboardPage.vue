@@ -215,7 +215,7 @@ export default {
 }
 
 .scene-placeholder-card .placeholder-graphic {
-  min-height: 250px; /* Increased height */
+  height: 500px;
   background-color: var(--color-background-main); /* Slightly different from cards-panels for contrast */
   display: flex;
   justify-content: center;
