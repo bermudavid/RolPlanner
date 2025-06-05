@@ -3,6 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { UserRole } from '../user/user.entity';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -12,9 +13,12 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() body: any) {
-    // In a real app, you'd use DTOs and validation
-    return this.userService.create(body.username, body.password, body.role || UserRole.PLAYER);
+  async register(@Body() registerDto: RegisterDto) {
+    return this.userService.create(
+      registerDto.username,
+      registerDto.password,
+      registerDto.role || UserRole.PLAYER,
+    );
   }
 
   @UseGuards(AuthGuard('local'))
