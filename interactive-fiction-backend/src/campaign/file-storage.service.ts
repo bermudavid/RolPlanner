@@ -3,6 +3,10 @@ import { diskStorage, StorageEngine } from 'multer';
 import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
+import { exec as execCb } from 'child_process';
+import { promisify } from 'util';
+
+const exec = promisify(execCb);
 
 // Decompression library is ESM only. Use dynamic import to avoid commonjs issues.
 type Decompress = (input: Buffer, output: string) => Promise<unknown>;
@@ -33,8 +37,10 @@ export class FileStorageService {
       const dirName = randomUUID();
       const dirPath = join(uploadsDir, dirName);
       await fs.mkdir(dirPath, { recursive: true });
+
       const decompress = await getDecompress();
       await decompress(file.buffer, dirPath);
+
       const files = await fs.readdir(dirPath);
       const modelFile = files.find((f) =>
         f.toLowerCase().endsWith('.gltf') || f.toLowerCase().endsWith('.glb'),
@@ -44,6 +50,7 @@ export class FileStorageService {
       }
       return `/models/${dirName}/${modelFile}`;
     }
+
 
     const filename = `${randomUUID()}${ext}`;
     const filePath = join(uploadsDir, filename);
