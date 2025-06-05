@@ -6,12 +6,17 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { io } from 'socket.io-client';
 
 export default {
   name: 'MapViewer',
   props: {
     modelUrl: {
       type: String,
+      required: true,
+    },
+    sessionId: {
+      type: Number,
       required: true,
     },
   },
@@ -22,15 +27,27 @@ export default {
       renderer: null,
       controls: null,
       animationFrameId: null,
+      socket: null,
     };
   },
   mounted() {
     this.initThree();
     this.loadModel();
     this.animate();
+
+    this.socket = io('http://localhost:3000/sessions');
+    this.socket.emit('joinSession', { sessionId: this.sessionId });
+    this.socket.on('cameraUpdate', payload => {
+      if (payload.clientId !== this.socket.id) {
+        this.updatePlayerView(payload.position, payload.quaternion);
+      }
+    });
   },
   beforeUnmount() {
     this.cleanupThree();
+    if (this.socket) {
+      this.socket.disconnect();
+    }
   },
   watch: {
     modelUrl(newUrl, oldUrl) {
@@ -193,18 +210,30 @@ export default {
     },
 
     sendCameraData(position, quaternion) {
-      // In a real app, this would send data to the backend (e.g., via WebSockets)
-      console.log('Camera Data (Send):', {
-        position: { x: position.x, y: position.y, z: position.z },
-        quaternion: { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w },
-      });
+      if (this.socket) {
+        this.socket.emit('cameraUpdate', {
+          sessionId: this.sessionId,
+          position: { x: position.x, y: position.y, z: position.z },
+          quaternion: {
+            x: quaternion.x,
+            y: quaternion.y,
+            z: quaternion.z,
+            w: quaternion.w,
+          },
+        });
+      }
     },
 
     updatePlayerView(position, quaternion) {
-      // This would be called when receiving data for other players
-      // For the current user's camera, OrbitControls handles it.
-      // This might be used to update representations of other players' cameras.
-      console.log('Camera Data (Receive for other player):', { position, quaternion });
+      if (this.camera) {
+        this.camera.position.set(position.x, position.y, position.z);
+        this.camera.quaternion.set(
+          quaternion.x,
+          quaternion.y,
+          quaternion.z,
+          quaternion.w,
+        );
+      }
       // Example: if you had an object representing another player's view:
       // otherPlayerCameraObject.position.set(position.x, position.y, position.z);
       // otherPlayerCameraObject.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
