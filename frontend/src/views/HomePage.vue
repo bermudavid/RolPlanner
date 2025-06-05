@@ -1,5 +1,6 @@
 <template>
   <div class="home-page-container">
+    <img src="../assets/banner.svg" alt="Rol Planner banner" class="home-banner" />
     <div class="card welcome-card">
       <h1 class="card-title">Welcome to the Interactive Fiction Platform</h1>
       <p>
@@ -51,6 +52,14 @@ export default {
   flex-direction: column;
   align-items: center; /* Centers cards horizontally */
   padding-top: 20px; /* Add some space at the top */
+}
+
+.home-banner {
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .welcome-card, .features-card {
