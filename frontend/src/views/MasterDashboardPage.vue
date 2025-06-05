@@ -142,7 +142,7 @@ export default {
   font-family: var(--font-primary);
   font-size: var(--font-size-buttons); /* Using button font size for consistency */
   color: var(--color-text-primary); /* Primary text for better visibility */
-  background-color: var(--color-buttons); /* Using button color */
+  background-color: var(--color-buttons-end); /* Using button color */
   padding: 10px 18px; /* Adjusted padding */
   border-radius: 6px;
   border: 1px solid var(--color-accent-blue);
@@ -208,7 +208,7 @@ export default {
 
 .event-manager-card li, .tips-card li {
   padding: 10px 5px; /* Increased padding for list items */
-  border-bottom: 1px solid var(--color-buttons); /* Subtle separator */
+  border-bottom: 1px solid var(--color-buttons-end); /* Subtle separator */
   line-height: 1.5; /* Improve readability */
 }
 

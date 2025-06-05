@@ -5,15 +5,17 @@
 /* For now, assume Georgia is available or use a common serif fallback */
 
 :root {
-  --font-primary: 'Georgia', serif;
+  --font-primary: 'Cinzel', serif;
 
-  --color-background-main: #1C1F2B;
-  --color-cards-panels: #222633;
-  --color-buttons: #2D3544;
-  --color-button-hover: #3C4F6E; /* Botón activo (hover) */
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #D3D7E0;
-  --color-accent-blue: #3A4A66; /* Acentos azulados */
+  --color-background-main: #2a2139;
+  --color-cards-panels: #362b46;
+  --color-buttons-start: #9067c6;
+  --color-buttons-end: #4c3f63;
+  --color-button-hover: #a47bd6; /* Botón activo (hover) */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e0d2ff;
+  --color-accent-blue: #9067c6; /* Acentos violetas */
+  --color-accent-gold: #d6b657;
 
   /* Base font sizes from typography table */
   --font-size-titles-main: 24px;
@@ -43,7 +45,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 20px;
   margin-bottom: 20px; /* Spacing between cards */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  border: 1px solid var(--color-accent-blue); /* Subtle border */
+  border: 1px solid var(--color-accent-gold); /* Subtle border */
 }
 
 .card-title {
@@ -58,29 +60,34 @@ h1, h2, h3, h4, h5, h6 {
   font-size: var(--font-size-buttons);
   font-weight: 500; /* Medium */
   color: var(--color-text-primary);
-  background-color: var(--color-buttons);
-  border: none;
+  background: linear-gradient(45deg,
+      var(--color-buttons-start),
+      var(--color-buttons-end));
+  border: 1px solid var(--color-accent-gold);
   padding: 10px 20px;
   border-radius: 6px; /* Rounded corners */
   cursor: pointer;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Effect of elevation */
+  transition: background 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Effect of elevation */
 }
 
 .btn:hover {
-  background-color: var(--color-button-hover);
+  background: linear-gradient(45deg,
+      var(--color-button-hover),
+      var(--color-buttons-end));
 }
 
 /* General link styling */
 a {
-  color: var(--color-accent-blue);
+  color: var(--color-accent-gold);
   text-decoration: none;
 }
 
 a:hover {
+  color: var(--color-accent-blue);
   text-decoration: underline;
 }
 
@@ -89,9 +96,9 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 select {
-  background-color: var(--color-buttons); /* Similar to button bg */
+  background-color: var(--color-cards-panels); /* Similar to card bg */
   color: var(--color-text-primary);
-  border: 1px solid var(--color-accent-blue);
+  border: 1px solid var(--color-accent-gold);
   border-radius: 4px;
   padding: 10px;
   margin-bottom: 10px; /* Add some default margin */
@@ -104,7 +111,7 @@ input[type="email"]:focus,
 select:focus {
   outline: none;
   border-color: var(--color-text-secondary); /* Highlight focus */
-  box-shadow: 0 0 5px rgba(var(--color-accent-blue-rgb), 0.5); /* Using accent blue with alpha */
+  box-shadow: 0 0 5px var(--color-accent-gold);
 }
 
 /* Add a general container for pages to have some padding */
