@@ -157,6 +157,20 @@ describe('AuthController (e2e)', () => {
         .expect(401); // Unauthorized
     });
 
+    it('should fail to login with missing username', () => {
+      return request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({ password: password })
+        .expect(400); // Validation error
+    });
+
+    it('should fail to login with missing password', () => {
+      return request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({ username: uniqueUsernameLogin })
+        .expect(400); // Validation error
+    });
+
     it('should fail to login with non-existent username', () => {
       return request(app.getHttpServer())
         .post('/api/auth/login')
