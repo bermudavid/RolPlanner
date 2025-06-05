@@ -40,7 +40,8 @@
     "typeorm": "^0.3.24",
     "socket.io": "^4.7.2",
     "multer": "^1.4.5-lts.1",
-    "@nestjs/websockets": "^11.0.1"
+    "@nestjs/websockets": "^11.0.1",
+    "@xhmikosr/decompress": "^10.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
