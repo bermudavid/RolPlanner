@@ -34,8 +34,17 @@ export class SessionController {
 
   @Post(':id/join')
   @Roles(UserRole.PLAYER)
-  joinSession(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    return this.sessionService.joinSession(id, req.user);
+  joinSession(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() joinDto: { joinToken?: string; password?: string },
+    @Request() req,
+  ) {
+    return this.sessionService.joinSession(
+      id,
+      req.user,
+      joinDto.joinToken,
+      joinDto.password,
+    );
   }
 
   @Post(':id/leave')

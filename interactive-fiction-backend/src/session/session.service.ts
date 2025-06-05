@@ -6,6 +6,7 @@ import { User, UserRole } from '../user/user.entity';
 import { Campaign } from '../campaign/campaign.entity';
 import { CampaignService } from '../campaign/campaign.service'; // To fetch campaign details
 import { UserService } from '../user/user.service'; // To fetch user details
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SessionService {
@@ -70,13 +71,33 @@ export class SessionService {
     });
   }
 
-  async joinSession(sessionId: number, player: User): Promise<Session> {
+  async joinSession(
+    sessionId: number,
+    player: User,
+    joinToken?: string,
+    password?: string,
+  ): Promise<Session> {
     if (player.role !== UserRole.PLAYER) {
       throw new UnauthorizedException('Only Players can join sessions.');
     }
     const session = await this.getSessionById(sessionId);
     if (session.status !== SessionStatus.PENDING && session.status !== SessionStatus.ACTIVE) {
       throw new BadRequestException('Session is not active or pending.');
+    }
+
+    if (!session.campaign.is_public) {
+      if (!joinToken || joinToken !== session.campaign.join_token) {
+        throw new UnauthorizedException('Invalid join token.');
+      }
+      if (session.campaign.password_hash) {
+        const match = await bcrypt.compare(
+          password || '',
+          session.campaign.password_hash,
+        );
+        if (!match) {
+          throw new UnauthorizedException('Invalid password.');
+        }
+      }
     }
 
     const playerAlreadyJoined = session.active_players.some(p => p.id === player.id);
