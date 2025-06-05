@@ -14,8 +14,6 @@
     </header>
     <main class="main-content page-container">
       <router-view />
-    <main class="main-content page-container">
-      <router-view></router-view>
     </main>
   </div>
 </template>
