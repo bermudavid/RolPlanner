@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, Brackets } from 'typeorm';
+import { Repository, Brackets } from 'typeorm';
 import { Session, SessionStatus } from './session.entity';
 import { User, UserRole } from '../user/user.entity';
 import { Campaign } from '../campaign/campaign.entity';
