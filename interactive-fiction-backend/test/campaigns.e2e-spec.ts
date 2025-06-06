@@ -17,6 +17,9 @@ describe('CampaignController (e2e)', () => {
   let masterToken: string;
   let playerToken: string;
   let campaignId: number;
+  let privateCampaignId: number;
+  let privateJoinToken: string;
+  let privateSessionId: number;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -51,6 +54,28 @@ describe('CampaignController (e2e)', () => {
       .send({ username: playerUsername, password })
       .expect(201);
     playerToken = playerRes.body.access_token;
+
+    const privateRes = await request(app.getHttpServer())
+      .post('/api/campaigns')
+      .set('Authorization', `Bearer ${masterToken}`)
+      .send({ name: 'Private Campaign', description: 'secret', is_public: false })
+      .expect(201);
+    privateCampaignId = privateRes.body.id;
+    const joinLink = privateRes.body.joinLink;
+    privateJoinToken = joinLink.split('token=')[1];
+
+    const sessionRes = await request(app.getHttpServer())
+      .post('/api/sessions')
+      .set('Authorization', `Bearer ${masterToken}`)
+      .send({ name: 'PrivSess', campaign_id: privateCampaignId })
+      .expect(201);
+    privateSessionId = sessionRes.body.id;
+
+    await request(app.getHttpServer())
+      .post(`/api/sessions/${privateSessionId}/join`)
+      .set('Authorization', `Bearer ${playerToken}`)
+      .send({ joinToken: privateJoinToken })
+      .expect(201);
   });
 
   afterAll(async () => {
@@ -96,5 +121,15 @@ describe('CampaignController (e2e)', () => {
       .set('Authorization', `Bearer ${playerToken}`)
       .send({ name: 'Bad Update', description: 'nope' })
       .expect(403);
+  });
+
+  it('lists private campaigns for joined players', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/campaigns')
+      .set('Authorization', `Bearer ${playerToken}`)
+      .expect(200);
+
+    const ids = res.body.map(c => c.id);
+    expect(ids).toContain(privateCampaignId);
   });
 });

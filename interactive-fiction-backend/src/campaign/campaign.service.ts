@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Campaign } from './campaign.entity';
 import { User, UserRole } from '../user/user.entity';
+import { Session } from '../session/session.entity';
 import { FileStorageService } from './file-storage.service';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
@@ -45,8 +46,7 @@ export class CampaignService {
 
   async findAllForUser(user: User): Promise<Campaign[]> {
     if (user.role === UserRole.MASTER) {
-      // Masters should see their own campaigns as well as any
-      // other public campaigns available on the platform.
+      // Masters see their own campaigns plus other public ones
       return this.campaignsRepository.find({
         where: [
           { master_id: user.id },
@@ -56,10 +56,21 @@ export class CampaignService {
       });
     }
 
-    return this.campaignsRepository.find({
-      where: { is_public: true },
-      relations: ['master'],
-    });
+    // Players should see public campaigns as well as private campaigns
+    // for sessions they are actively participating in
+    const qb = this.campaignsRepository
+      .createQueryBuilder('campaign')
+      .leftJoin('campaign.master', 'master')
+      .leftJoin('session', 'session', 'session.campaign_id = campaign.id')
+      .leftJoin('session_players', 'sp', 'sp.session_id = session.id')
+      .where('campaign.is_public = true')
+      .orWhere('sp.user_id = :userId', { userId: user.id })
+      .select(['campaign.id', 'campaign.name', 'campaign.description',
+        'campaign.map_details', 'campaign.model_path', 'campaign.is_public',
+        'campaign.password_hash', 'campaign.join_token',
+        'campaign.master_id', 'master.id', 'master.username', 'master.role']);
+
+    return qb.getMany();
   }
 
   async findOne(id: number): Promise<Campaign> {
