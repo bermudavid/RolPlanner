@@ -85,6 +85,13 @@
                 >
                   Start
                 </button>
+                <button
+                  v-if="s.status === 'Active'"
+                  class="btn"
+                  @click="endSession(s.id)"
+                >
+                  End
+                </button>
               </div>
             </li>
           </ul>
@@ -211,6 +218,11 @@ export default {
     },
     async startSession(id) {
       await api.patch(`/sessions/${id}/start`);
+      await this.fetchSessions();
+    },
+
+    async endSession(id) {
+      await api.patch(`/sessions/${id}/end`);
       await this.fetchSessions();
     },
 

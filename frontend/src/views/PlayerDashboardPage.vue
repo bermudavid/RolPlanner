@@ -106,7 +106,6 @@ export default {
     async fetchSessions() {
       try {
         const { data } = await api.get('/sessions');
-        this.sessions = data;
         const campaigns = {};
         data.forEach(s => {
           if (s.active_players.some(p => p.id === this.userId)) {
@@ -114,6 +113,7 @@ export default {
           }
         });
         this.activeCampaigns = Object.values(campaigns);
+        this.sessions = data.filter(s => campaigns[s.campaign.id]);
       } catch (e) {
         console.error('Failed to fetch sessions:', e);
         this.sessions = [];
