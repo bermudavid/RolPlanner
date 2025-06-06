@@ -76,8 +76,8 @@ describe('PlayerDashboardPage.vue', () => {
 
   it('loads and displays available sessions', () => {
     const items = wrapper.findAll('.session-item');
-    expect(items.length).toBe(2);
-    expect(items[0].text()).toContain('S1');
+    expect(items.length).toBe(1);
+    expect(items[0].text()).toContain('S2');
   });
 
   it('loads and displays available campaigns', () => {

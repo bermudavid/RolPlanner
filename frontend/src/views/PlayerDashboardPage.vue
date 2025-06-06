@@ -113,7 +113,9 @@ export default {
           }
         });
         this.activeCampaigns = Object.values(campaigns);
-        this.sessions = data.filter(s => campaigns[s.campaign.id]);
+        this.sessions = data.filter(
+          s => campaigns[s.campaign.id] && s.status === 'Active'
+        ); 
       } catch (e) {
         console.error('Failed to fetch sessions:', e);
         this.sessions = [];
